@@ -11,3 +11,6 @@ Cargo.lock
 
 /target
 **/*.rs.bk
+
+/assets/**/Desktop.ini
+/assets/live/**/*.ico
