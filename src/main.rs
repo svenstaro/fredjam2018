@@ -1,7 +1,9 @@
 extern crate termion;
 extern crate tui;
+extern crate unicode_width;
 
-use std::io;
+use std::io::{self, Write};
+use termion::cursor::Goto;
 use termion::event::Key;
 use termion::raw::IntoRawMode;
 use tui::backend::TermionBackend;
@@ -9,6 +11,7 @@ use tui::layout::{Constraint, Corner, Direction, Layout, Rect};
 use tui::style::{Color, Modifier, Style};
 use tui::widgets::{Block, Borders, List, Paragraph, Text, Widget};
 use tui::Terminal;
+use unicode_width::UnicodeWidthStr;
 
 mod event;
 
@@ -32,6 +35,7 @@ pub struct GameEvent {
 pub struct App {
     pub size: Rect,
     pub log: Vec<GameEvent>,
+    pub input: String,
 }
 
 fn main() -> Result<(), io::Error> {
@@ -57,11 +61,10 @@ fn main() -> Result<(), io::Error> {
                 .margin(1)
                 .constraints([Constraint::Percentage(70), Constraint::Percentage(30)].as_ref())
                 .split(size);
-            // let v_chunks = Layout::default()
-            //     .direction(Direction::Vertical)
-            //     .margin(1)
-            //     .constraints([Constraint::Percentage(70), Constraint::Percentage(30)].as_ref())
-            //     .split(size);
+            let v_chunks = Layout::default()
+                .direction(Direction::Vertical)
+                .constraints([Constraint::Length(3), Constraint::Min(1)].as_ref())
+                .split(h_chunks[0]);
             let styled_log = {
                 let mut log = vec![];
                 for game_event in &app.log {
@@ -76,23 +79,40 @@ fn main() -> Result<(), io::Error> {
                 log
             };
             Paragraph::new(styled_log.iter())
-                .block(Block::default().borders(Borders::ALL).title("Events"))
+                .block(Block::default().borders(Borders::ALL).title("Input"))
                 .wrap(true)
-                .render(&mut f, h_chunks[0]);
+                .render(&mut f, v_chunks[1]);
+            Paragraph::new([Text::raw(&app.input)].iter())
+                .style(Style::default().fg(Color::Yellow))
+                .block(Block::default().borders(Borders::ALL).title("Events"))
+                .render(&mut f, v_chunks[0]);
             Block::default()
                 .title("Map")
                 .borders(Borders::ALL)
                 .render(&mut f, h_chunks[1]);
         })?;
 
+        write!(
+            terminal.backend_mut(),
+            "{}",
+            Goto(4 + app.input.width() as u16, 3)
+        )?;
+
         match events.next().unwrap() {
-            Event::Input(input) => {
-                if input == Key::Char('q') {
+            Event::Input(input) => match input {
+                Key::Char('q') => {
                     break;
                 }
-                // if input == Key::Char('s') {
-                //     app.log.push(GameEvent { content: "\n");
-                // }
+                Key::Char('\n') => {
+                    app.log.push(GameEvent { content: app.input.drain(..).collect(), game_event_type: GameEventType::Normal });
+                }
+                Key::Char(c) => {
+                    app.input.push(c);
+                }
+                Key::Backspace => {
+                    app.input.pop();
+                }
+                _ => {}
             }
             event::Event::Tick => {
                 app.log.push(GameEvent { content: "text ".to_string(), game_event_type: GameEventType::Combat });
