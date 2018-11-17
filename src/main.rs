@@ -364,6 +364,14 @@ fn main() -> Result<(), io::Error> {
                 }
                 Action::Dodge => {
                     let mut attack_timers = app.event_queue.get_timers(TimerType::EnemyAttack);
+                    if attack_timers.is_empty() {
+                        app.event_queue.schedule_action(Action::Message(
+                            String::from("You dodge the attack of your own paranoia..."),
+                            GameEventType::Failure,
+                        ));
+                        break;
+                    }
+
                     for elem in attack_timers.iter_mut() {
                         elem.elapsed = 0;
                     }
