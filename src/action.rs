@@ -10,10 +10,8 @@ pub enum ActionHandled {
 pub enum Action {
     // Do nothing.
     Nop,
-    // String is room name.
     Enter(RoomType),
     Tick(u64),
-    // String is room name.
     Leave(RoomType),
     Message(String, GameEventType),
     Command(String),
