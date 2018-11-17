@@ -121,15 +121,6 @@ fn main() -> Result<(), io::Error> {
     app.event_queue
         .schedule_action(Action::Enter(RoomType::Cryobay));
 
-    // app.event_queue
-    //     .schedule_timer(Timer::new("example", 0, 10000, Action::Nop, true));
-    // app.event_queue
-    //     .schedule_timer(Timer::new("empty 10000", 0, 10000, Action::Nop, true));
-    // app.event_queue
-    //     .schedule_timer(Timer::new("empty 6000", 0, 6000, Action::Nop, true));
-    // app.event_queue
-    //     .schedule_timer(Timer::new("full 8000", 8000, 8000, Action::Nop, true));
-
     let mut now = Instant::now();
 
     loop {
