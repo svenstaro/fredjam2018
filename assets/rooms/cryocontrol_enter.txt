@@ -1,2 +1,1 @@
-You press the 'open' button next to the door to cryocontrol. The door vanishes, revealing a room bathed in red light. There are holos on the walls, some frantically flashing, some showing rapidly jumping readouts of cryo devices.
-On a Terminal in the opposite corner of the room, you spot one of the ship's janitor rats. You recall that these bioengineered animals, controlled by nanobots linked to their olfactory system, are commonplace on the SC Cyclone. You are used to them scuttling around you, cleaning and maintaining the ship. This one is snarling. It starts to leap towards you.
+You are re-enter the cryocontrol room.

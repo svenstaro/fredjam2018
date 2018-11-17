@@ -83,4 +83,8 @@ impl Room for CryobayRoom {
     fn visit(&mut self) {
         self.visited = true;
     }
+
+    fn is_visited(&self) -> bool{
+        self.visited
+    }
 }

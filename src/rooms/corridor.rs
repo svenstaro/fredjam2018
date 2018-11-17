@@ -10,9 +10,7 @@ pub struct CorridorRoom {
 
 impl CorridorRoom {
     pub fn new() -> CorridorRoom {
-        CorridorRoom {
-            visited: false,
-        }
+        CorridorRoom { visited: false }
     }
 }
 
@@ -28,5 +26,9 @@ impl Room for CorridorRoom {
 
     fn visit(&mut self) {
         self.visited = true;
+    }
+
+    fn is_visited(&self) -> bool{
+        self.visited
     }
 }
