@@ -24,9 +24,9 @@ pub fn try_handle_command(tokens: String, state: &State) -> Vec<Action> {
                         vec![Action::Message(String::from("You can't go to ") + &room_name + " from here.", GameEventType::Failure)]
                     }
                 },
-                None => vec![Action::Message(String::from("There is no room named ") + &room_name, GameEventType::Failure)]
+                None => vec![Action::Message(String::from("There is no room named \"") + &room_name + "\".", GameEventType::Failure)]
             }
         },
-        _ => vec![]
+        _ => vec![Action::Message(String::from("Use one of the following commands: enter."), GameEventType::Failure)]
     }
 }
