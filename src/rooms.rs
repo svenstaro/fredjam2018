@@ -1,6 +1,9 @@
+use std::fmt::Debug;
+
+use crate::enemy::Enemy;
 use crate::EventQueue;
 use crate::{Action, GameEventType, State};
-use std::fmt::Debug;
+use crate::enemy::{EnemyType, GenericEnemy};
 
 pub trait Room: Debug {
     fn handle_action(
@@ -109,6 +112,20 @@ impl Room for SlushLobbyRoom {
         event_queue: &mut EventQueue,
         action: &Action,
     ) -> bool {
+        match action {
+            Action::Enter(room_type) => {
+                match room_type {
+                    RoomType::SlushLobby => {
+                        let rat = GenericEnemy::new(EnemyType::Rat, 5, 1, 60*1000);
+                        let timer = rat.get_attack_timer();
+                        event_queue.schedule_timer(timer);
+                        state.enemy = Some(Box::new(rat));
+                    }
+                    _ => {}
+                }
+            }
+            _ => {},
+        }
         false
     }
 }
