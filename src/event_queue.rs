@@ -13,6 +13,12 @@ impl EventQueue {
         self.actions.push_back(action);
     }
 
+    pub fn schedule_actions(&mut self, actions: Vec<Action>) {
+        for action in actions {
+            self.actions.push_back(action);
+        }
+    }
+
     pub fn schedule_timer(&mut self, timer: Timer) {
         self.timers.push(timer);
     }

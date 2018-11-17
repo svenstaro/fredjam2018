@@ -88,10 +88,9 @@ impl App {
         ActionHandled::NotHandled
     }
 
-    pub fn try_handle_command(&mut self, tokens: String) -> () {
-        for action in try_handle_command(tokens, &self.state) {
-            self.event_queue.schedule_action(action);
-        }
+    pub fn try_handle_command(&mut self, tokens: String) {
+        let actions = try_handle_command(tokens, &self.state);
+        self.event_queue.schedule_actions(actions);
     }
 }
 
@@ -333,6 +332,29 @@ fn main() -> Result<(), io::Error> {
                             app.event_queue.schedule_action(Action::PlayerDied);
                         }
                     }
+                }
+                Action::Attack => {
+                    let damage = app.state.player.attack_strength;
+                    let mut enemy_option = app.state.get_current_enemy_mut(app.state.current_room);
+                    match enemy_option {
+                        Some(ref mut enemy) => {
+                            enemy.reduce_health(damage);
+                            if enemy.get_health() <= 0 {
+                                app.state.enemies.remove(&app.state.current_room);
+                                app.event_queue.schedule_action(Action::Message(
+                                        String::from("The enemy has been slain."),
+                                        GameEventType::Failure,
+                                        ));
+                                app.event_queue.emplace_timers(TimerType::EnemyAttack, vec![]);
+                            }
+                        }
+                        None => {
+                            app.event_queue.schedule_action(Action::Message(
+                                    String::from("There is nothing you can attack."),
+                                    GameEventType::Failure,
+                                    ));
+                        },
+                    };
                 }
                 Action::PlayerDied => {
                     app.event_queue.schedule_action(Action::Message(
