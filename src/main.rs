@@ -42,6 +42,7 @@ use crate::event_queue::EventQueue;
 use crate::game_event::{GameEvent, GameEventType};
 use crate::room::{enter_room, Room, RoomType};
 use crate::rooms::{CryobayRoom, SlushLobbyRoom};
+use crate::timer::TimerType;
 
 use crate::state::State;
 use crate::utils::{duration_to_msec_u64, BoxShape};
@@ -337,6 +338,25 @@ fn main() -> Result<(), io::Error> {
                     app.event_queue.schedule_action(Action::Message(
                         String::from("You died."),
                         GameEventType::Failure,
+                    ));
+                }
+                Action::Dodge => {
+                    let mut attack_timers = app.event_queue.get_timers(TimerType::EnemyAttack);
+                    for elem in attack_timers.iter_mut() {
+                        elem.elapsed = 0;
+                    }
+                    app.event_queue
+                        .emplace_timers(TimerType::EnemyAttack, attack_timers);
+
+                    let enemy_type = app
+                        .state
+                        .enemies
+                        .get(&app.state.current_room)
+                        .unwrap()
+                        .get_enemy_type();
+                    app.event_queue.schedule_action(Action::Message(
+                        String::from(format!("You dodge the {:?}'s attack.", enemy_type)),
+                        GameEventType::Success,
                     ));
                 }
                 Action::Tick(dt) => {

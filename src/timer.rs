@@ -2,7 +2,7 @@ use crate::action::Action;
 
 #[derive(Debug, Clone, PartialEq, Eq)]
 pub enum TimerType {
-    Combat,
+    EnemyAttack,
     Oxygen,
     Storytime,
 }

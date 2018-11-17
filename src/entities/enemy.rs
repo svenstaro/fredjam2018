@@ -71,7 +71,7 @@ impl Enemy for GenericEnemy {
     fn get_attack_timers(&self) -> Vec<Timer> {
         vec![
             Timer::new(
-                TimerType::Combat,
+                TimerType::EnemyAttack,
                 // Unused, because invisible.
                 &format!("{:?} attack notification timer", self.enemy_type),
                 0,
@@ -84,7 +84,7 @@ impl Enemy for GenericEnemy {
                 false,
             ),
             Timer::new(
-                TimerType::Combat,
+                TimerType::EnemyAttack,
                 &String::from(format!(
                     "The {:?} is preparing to attack you.",
                     self.enemy_type
