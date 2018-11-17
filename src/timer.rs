@@ -3,9 +3,9 @@ use std::collections::HashMap;
 
 #[derive(Debug)]
 pub struct Timer {
-    label: String,
-    elapsed: u64,
-    duration: u64,
+    pub label: String,
+    pub elapsed: u64,
+    pub duration: u64,
     timings: HashMap<u8, Action>,
 }
 
