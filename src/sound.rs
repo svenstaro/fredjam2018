@@ -7,6 +7,7 @@ use rodio::{self, Sink};
 use std::io::Cursor;
 use std::sync::mpsc::Receiver;
 use std::time::Duration;
+use std::sync::{Mutex, Arc};
 
 #[derive(Clone, Copy, PartialEq, Eq, Debug)]
 pub enum AudioEvent {
@@ -25,22 +26,32 @@ pub enum Track {
 }
 
 struct MusicPlayback {
-    track: Track,
+    track: Arc<Mutex<Track>>,
     inner_source: Box<Source<Item = i16> + Send>,
 }
 
-impl MusicPlayback {
-    fn new() -> Self {
-        MusicPlayback {
-            track: Track::Intro,
-            inner_source: Box::new(Zero::new(2, 44800)),
-        }
-    }
+struct MusicPlaybackController {
+    track: Arc<Mutex<Track>>
+}
 
+impl MusicPlaybackController {
     fn set_track(&mut self, track: Track) {
-        self.track = track;
-        let audio = AudioEvent::Track(track);
-        self.inner_source = Box::new(Decoder::new(audio.data_cursor()).unwrap().repeat_infinite())
+        *self.track.lock().unwrap() = track;
+        // let audio = AudioEvent::Track(track);
+        // self.inner_source = Box::new(Decoder::new(audio.data_cursor()).unwrap().repeat_infinite())
+    }
+}
+
+impl MusicPlayback {
+    fn create() -> (Self, MusicPlaybackController) {
+        let track = Arc::new(Mutex::new(Track::Intro));
+        (MusicPlayback {
+            track: track.clone(),
+            inner_source: Box::new(Zero::new(2, 44800)),
+        },
+        MusicPlaybackController{
+            track: track
+        })
     }
 }
 
@@ -90,18 +101,24 @@ impl AudioEvent {
 pub fn start(recv: Receiver<AudioEvent>) {
     let device = rodio::default_output_device().unwrap();
     let sink = Sink::new(&device);
-    let (effect_mixer_controller, effect_mixer): (
-        std::sync::Arc<rodio::dynamic_mixer::DynamicMixerController<i16>>,
-        rodio::dynamic_mixer::DynamicMixer<i16>,
-    ) = mixer(2, 44800);
-    let music = MusicPlayback::new();
+    let (effect_mixer_controller, effect_mixer):
+        (std::sync::Arc<rodio::dynamic_mixer::DynamicMixerController<i16>>,
+         rodio::dynamic_mixer::DynamicMixer<i16>) = mixer(2, 44800);
+    let (mut music, mut music_controller) = MusicPlayback::create();
 
     sink.append(effect_mixer);
     effect_mixer_controller.add(Zero::new(2, 44800));
     effect_mixer_controller.add(music);
     loop {
         let message = recv.recv().unwrap();
-        let source = rodio::Decoder::new(message.data_cursor()).unwrap();
-        effect_mixer_controller.add(source);
+        match message {
+            AudioEvent::Effect(_) => {
+                let source = rodio::Decoder::new(message.data_cursor()).unwrap();
+                effect_mixer_controller.add(source);
+            },
+            AudioEvent::Track(ref track) => {
+                music_controller.set_track(*track)
+            }
+        }
     }
 }
