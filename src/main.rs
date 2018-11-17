@@ -11,8 +11,12 @@ use tui::widgets::canvas::{Canvas, Line, Shape};
 use tui::widgets::{Block, Borders, List, Paragraph, Text, Widget};
 use tui::Terminal;
 use unicode_width::UnicodeWidthStr;
+use std::thread;
+use std::sync::mpsc::channel;
+use self::sound::{AudioEvent, Effect};
 
 mod event;
+mod sound;
 
 use crate::event::{Event, Events};
 
@@ -247,6 +251,13 @@ pub struct App {
 }
 
 fn main() -> Result<(), io::Error> {
+    let (snd_send, snd_recv) = channel();
+
+    snd_send.send(AudioEvent::Effect(Effect::BeepLong));
+    thread::spawn(move || {
+        sound::start(snd_recv);
+    });
+
     let stdout = io::stdout().into_raw_mode()?;
     let backend = TermionBackend::new(stdout);
     let mut terminal = Terminal::new(backend)?;
@@ -349,6 +360,7 @@ fn main() -> Result<(), io::Error> {
                     app.state.schedule_action(command);
                 }
                 Key::Char(c) => {
+                    snd_send.send(AudioEvent::Effect(Effect::BeepLong));
                     app.input.push(c);
                 }
                 Key::Backspace => {
