@@ -1,14 +1,26 @@
 use crate::action::Action;
+use crate::timer::Timer;
 use std::collections::VecDeque;
 
 #[derive(Debug, Default)]
 pub struct EventQueue {
     pub actions: VecDeque<Action>,
+    pub timers: Vec<Timer>,
 }
 
 impl EventQueue {
     pub fn schedule_action(&mut self, action: Action) {
         self.actions.push_back(action);
+    }
+
+    pub fn schedule_timer(&mut self, timer: Timer) {
+        self.timers.push(timer);
+    }
+
+    pub fn tick(&mut self, dt: u64) {
+        for timer in &mut self.timers {
+            timer.tick(dt);
+        }
     }
 
     pub fn is_empty(&self) -> bool {
