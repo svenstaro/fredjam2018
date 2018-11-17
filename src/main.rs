@@ -1,4 +1,3 @@
-use itertools::Itertools;
 use std::collections::{HashMap, VecDeque};
 use std::io::{self, Write};
 use termion::cursor::Goto;
@@ -13,57 +12,12 @@ use tui::Terminal;
 use unicode_width::UnicodeWidthStr;
 
 mod event;
+mod rooms;
+mod utils;
 
 use crate::event::{Event, Events};
-
-pub struct BoxShape {
-    pub rect: Rect,
-    pub color: Color,
-}
-
-impl<'a> Shape<'a> for BoxShape {
-    fn color(&self) -> Color {
-        self.color
-    }
-
-    fn points(&'a self) -> Box<Iterator<Item = (f64, f64)> + 'a> {
-        let left_line = Line {
-            x1: f64::from(self.rect.x),
-            y1: f64::from(self.rect.y),
-            x2: f64::from(self.rect.x),
-            y2: f64::from(self.rect.y + self.rect.height),
-            color: self.color,
-        };
-        let top_line = Line {
-            x1: f64::from(self.rect.x),
-            y1: f64::from(self.rect.y + self.rect.height),
-            x2: f64::from(self.rect.x + self.rect.width),
-            y2: f64::from(self.rect.y + self.rect.height),
-            color: self.color,
-        };
-        let right_line = Line {
-            x1: f64::from(self.rect.x + self.rect.width),
-            y1: f64::from(self.rect.y),
-            x2: f64::from(self.rect.x + self.rect.width),
-            y2: f64::from(self.rect.y + self.rect.height),
-            color: self.color,
-        };
-        let bottom_line = Line {
-            x1: f64::from(self.rect.x),
-            y1: f64::from(self.rect.y),
-            x2: f64::from(self.rect.x + self.rect.width),
-            y2: f64::from(self.rect.y),
-            color: self.color,
-        };
-        Box::new(
-            left_line.into_iter().merge(
-                top_line
-                    .into_iter()
-                    .merge(right_line.into_iter().merge(bottom_line.into_iter())),
-            ),
-        )
-    }
-}
+use crate::rooms::{LockedRoom, Room, WakeUpRoom};
+use crate::utils::BoxShape;
 
 #[derive(Debug)]
 pub enum GameEventType {
@@ -89,107 +43,6 @@ pub enum Action {
     Leave(&'static str),
     Message(String, GameEventType),
     Command(String),
-}
-
-pub trait Room {
-    fn handle_action(&mut self, state: &mut State, action: &Action) -> bool;
-}
-
-// Initial room.
-pub struct WakeUpRoom {
-    pub lever: bool,
-}
-
-impl Room for WakeUpRoom {
-    fn handle_action(&mut self, state: &mut State, action: &Action) -> bool {
-        match action {
-            Action::Enter(room) => {
-                if room == &"WakeUp" {
-                    state.schedule_action(Action::Message(
-                        String::from("Welcome to W.O.R.L.D."),
-                        GameEventType::Success,
-                    ));
-                    true
-                } else {
-                    false
-                }
-            }
-            Action::Command(command) => {
-                // TODO Maybe there's a better approach to finding the current room...
-                if state.current_room == "WakeUp" {
-                    // TODO replace command by proper enum.
-                    if command == &"use lever" {
-                        if !self.lever {
-                            state.schedule_action(Action::Message(
-                                String::from(
-                                    "You pull the lever, it flips down with a screeching noize.",
-                                ),
-                                GameEventType::Success,
-                            ));
-                            self.lever = true;
-                        } else {
-                            state.schedule_action(Action::Message(
-                                String::from("There is no point in pulling this back up."),
-                                GameEventType::Failure,
-                            ));
-                        }
-                        true
-                    } else if command == &"look around" {
-                        state.schedule_action(Action::Message(
-                            String::from("The room is empty, there is just some lever and a solid door with no handle."),
-                            GameEventType::Normal,
-                        ));
-                        true
-                    } else if command == &"use door" {
-                        if self.lever {
-                            state.schedule_action(Action::Message(
-                                String::from("You open the door and pass through."),
-                                GameEventType::Success,
-                            ));
-                            state.schedule_action(Action::Leave("WakeUp"));
-                            state.schedule_action(Action::Enter("Locked"));
-                            true
-                        } else {
-                            state.schedule_action(Action::Message(
-                                String::from("No matter how hard you push the door, it does not even move an inch."),
-                                GameEventType::Failure,
-                            ));
-                            true
-                        }
-                    } else {
-                        false
-                    }
-                } else {
-                    false
-                }
-            }
-            _ => false,
-        }
-    }
-}
-
-// Second room room, locked per default, lever needs to be pulled.
-pub struct LockedRoom;
-
-impl Room for LockedRoom {
-    fn handle_action(&mut self, state: &mut State, action: &Action) -> bool {
-        match action {
-            Action::Enter(room) => {
-                if room == &"Locked" {
-                    state.schedule_action(Action::Message(
-                        String::from(
-                            "Success, you have entered the second and final room! You win!",
-                        ),
-                        GameEventType::Success,
-                    ));
-                    true
-                } else {
-                    false
-                }
-            }
-            _ => false,
-        }
-    }
 }
 
 pub struct State {
