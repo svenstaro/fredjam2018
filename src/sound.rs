@@ -1,7 +1,6 @@
 use rodio::dynamic_mixer::mixer;
 use rodio::source::Zero;
 use rodio::Decoder;
-use rodio::Sample;
 use rodio::Source;
 use rodio::{self, Sink};
 use std::collections::HashMap;
@@ -31,6 +30,8 @@ struct MusicPlayback {
     track: Arc<Mutex<Track>>,
     inner_source: Box<Source<Item = i16> + Send>,
     data_cursors: HashMap<Track, Decoder<Cursor<&'static [u8]>>>,
+    current_cursor: Track,
+    samples_since_check: u64,
 }
 
 struct MusicPlaybackController {
@@ -60,6 +61,8 @@ impl MusicPlayback {
                 track: track.clone(),
                 inner_source: Box::new(Zero::new(2, 44800)),
                 data_cursors: cursors,
+                current_cursor: Track::Intro,
+                samples_since_check: 0,
             },
             MusicPlaybackController { track: track },
         )
@@ -68,17 +71,17 @@ impl MusicPlayback {
 
 impl Source for MusicPlayback {
     fn current_frame_len(&self) -> Option<usize> {
-        let decoder = self.data_cursors.get(&*self.track.lock().unwrap()).unwrap();
+        let decoder = self.data_cursors.get(&self.current_cursor).unwrap();
         decoder.current_frame_len()
     }
 
     fn channels(&self) -> u16 {
-        let decoder = self.data_cursors.get(&*self.track.lock().unwrap()).unwrap();
+        let decoder = self.data_cursors.get(&self.current_cursor).unwrap();
         decoder.channels()
     }
 
     fn sample_rate(&self) -> u32 {
-        let decoder = self.data_cursors.get(&*self.track.lock().unwrap()).unwrap();
+        let decoder = self.data_cursors.get(&self.current_cursor).unwrap();
         decoder.sample_rate()
     }
 
@@ -91,7 +94,12 @@ impl Iterator for MusicPlayback {
     type Item = i16;
 
     fn next(&mut self) -> Option<i16> {
-        let mut decoder_option = self.data_cursors.get_mut(&*self.track.lock().unwrap());
+        self.samples_since_check += 1;
+        if self.samples_since_check > 10_000 {
+            self.current_cursor = *self.track.lock().unwrap();
+            self.samples_since_check = 0
+        }
+        let decoder_option = self.data_cursors.get_mut(&self.current_cursor);
         decoder_option.and_then(|dec| dec.next())
     }
 }
@@ -120,7 +128,7 @@ pub fn start(recv: Receiver<AudioEvent>) {
         std::sync::Arc<rodio::dynamic_mixer::DynamicMixerController<i16>>,
         rodio::dynamic_mixer::DynamicMixer<i16>,
     ) = mixer(2, 44800);
-    let (mut music, mut music_controller) = MusicPlayback::create();
+    let (music, mut music_controller) = MusicPlayback::create();
 
     sink.append(effect_mixer);
     effect_mixer_controller.add(Zero::new(2, 44800));
