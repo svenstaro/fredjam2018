@@ -3,16 +3,23 @@ use crate::action::Action;
 
 #[derive(Debug)]
 pub struct Timer {
-    timings: HashMap<u8, Action>,
+    label: String,
+    elapsed: u64,
+    duration: u64,
+    timings: HashMap<u64, Action>,
 }
 
 impl Timer {
-    pub fn new(timings: HashMap<u8, Action>) -> Self {
+    pub fn new(label: &str, elapsed: u64, duration: u64, timings: HashMap<u64, Action>) -> Self {
         Timer {
-            timings
+            label: label.to_string(),
+            elapsed,
+            duration,
+            timings,
         }
     }
 
     pub fn tick(&mut self, dt: u64) {
+        self.elapsed += dt;
     }
 }
