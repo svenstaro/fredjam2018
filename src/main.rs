@@ -294,7 +294,7 @@ fn main() -> Result<(), io::Error> {
                 }
                 Action::Enter(room) => {
                     app.event_queue.schedule_action(Action::Message(
-                        String::from(room_intro_text(room)),
+                        String::from(room_intro_text(room).to_owned() + "\n"),
                         GameEventType::Normal,
                     ));
                     app.state.current_room = room;
