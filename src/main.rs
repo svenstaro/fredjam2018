@@ -1,4 +1,5 @@
 use itertools::Itertools;
+use std::collections::{HashMap, VecDeque};
 use std::io::{self, Write};
 use termion::cursor::Goto;
 use termion::event::Key;
@@ -10,7 +11,6 @@ use tui::widgets::canvas::{Canvas, Line, Shape};
 use tui::widgets::{Block, Borders, List, Paragraph, Text, Widget};
 use tui::Terminal;
 use unicode_width::UnicodeWidthStr;
-use std::collections::{VecDeque, HashMap};
 
 mod event;
 
@@ -96,24 +96,24 @@ pub trait Room {
 }
 
 // Initial room.
-pub struct WakeUp {
+pub struct WakeUpRoom {
     pub lever: bool,
 }
 
-impl Room for WakeUp {
+impl Room for WakeUpRoom {
     fn handle_action(&mut self, state: &mut State, action: &Action) -> bool {
         match action {
             Action::Enter(room) => {
                 if room == &"WakeUp" {
                     state.schedule_action(Action::Message(
                         String::from("Welcome to W.O.R.L.D."),
-                        GameEventType::Success
+                        GameEventType::Success,
                     ));
                     true
                 } else {
                     false
                 }
-            },
+            }
             Action::Command(command) => {
                 // TODO Maybe there's a better approach to finding the current room...
                 if state.current_room == "WakeUp" {
@@ -121,7 +121,9 @@ impl Room for WakeUp {
                     if command == &"use lever" {
                         if !self.lever {
                             state.schedule_action(Action::Message(
-                                String::from("You pull the lever, it flips down with a screeching noize."),
+                                String::from(
+                                    "You pull the lever, it flips down with a screeching noize.",
+                                ),
                                 GameEventType::Success,
                             ));
                             self.lever = true;
@@ -160,31 +162,33 @@ impl Room for WakeUp {
                 } else {
                     false
                 }
-            },
-            _ => false
+            }
+            _ => false,
         }
     }
 }
 
 // Second room room, locked per default, lever needs to be pulled.
 #[derive(Default)]
-pub struct Locked {}
+pub struct LockedRoom {}
 
-impl Room for Locked {
+impl Room for LockedRoom {
     fn handle_action(&mut self, state: &mut State, action: &Action) -> bool {
         match action {
             Action::Enter(room) => {
                 if room == &"Locked" {
                     state.schedule_action(Action::Message(
-                        String::from("Success, you have entered the second and final room! You win!"),
+                        String::from(
+                            "Success, you have entered the second and final room! You win!",
+                        ),
                         GameEventType::Success,
                     ));
                     true
                 } else {
                     false
                 }
-            },
-            _ => false
+            }
+            _ => false,
         }
     }
 }
@@ -224,8 +228,8 @@ impl State {
 impl Default for State {
     fn default() -> Self {
         let mut rooms: HashMap<&'static str, Box<Room>> = HashMap::new();
-        rooms.insert("WakeUp", Box::new(WakeUp{ lever: false }));
-        rooms.insert("Locked", Box::new(Locked{}));
+        rooms.insert("WakeUp", Box::new(WakeUpRoom { lever: false }));
+        rooms.insert("Locked", Box::new(LockedRoom {}));
         State {
             rooms,
             current_room: "WakeUp",
@@ -335,7 +339,7 @@ fn main() -> Result<(), io::Error> {
                     break;
                 }
                 Key::Char('\n') => {
-                    let mut content : String = app.input.drain(..).collect();
+                    let mut content: String = app.input.drain(..).collect();
                     let command = Action::Command(content.clone());
                     content.push('\n');
                     app.log.push(GameEvent {
@@ -363,19 +367,23 @@ fn main() -> Result<(), io::Error> {
             let next_action = app.state.actions.pop_front().unwrap();
             let handled = app.state.try_handle_room_action(&next_action);
             if handled {
-                break
+                break;
             }
 
             // Handle system and global actions here.
             match next_action {
                 Action::Message(mut message, game_event_type) => {
                     message.push('\n');
-                    app.log.push(GameEvent { content: message, game_event_type })
-                },
-                Action::Tick(dt) => {},
-                _ => {
-                    app.log.push(GameEvent { content: String::from("Unhandled action!\n"), game_event_type: GameEventType::Debug })
+                    app.log.push(GameEvent {
+                        content: message,
+                        game_event_type,
+                    })
                 }
+                Action::Tick(dt) => {}
+                _ => app.log.push(GameEvent {
+                    content: String::from("Unhandled action!\n"),
+                    game_event_type: GameEventType::Debug,
+                }),
             }
         }
 
