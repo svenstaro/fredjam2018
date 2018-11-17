@@ -29,12 +29,8 @@ pub fn try_handle_command(tokens: String, state: &State) -> Vec<Action> {
                 )],
             }
         }
-        Some("attack") => {
-            vec![Action::Attack]
-        }
-        Some("dodge") => {
-            vec![Action::Dodge]
-        }
+        Some("attack") => vec![Action::Attack],
+        Some("dodge") => vec![Action::Dodge],
         _ => vec![Action::Message(
             String::from("Use one of the following commands: enter, attack, dodge."),
             GameEventType::Failure,

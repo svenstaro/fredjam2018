@@ -1,7 +1,7 @@
+use crate::game_event::GameEventType;
+use crate::room::{Room, RoomType};
 use crate::EventQueue;
 use crate::{Action, ActionHandled, State};
-use crate::room::{Room, RoomType};
-use crate::game_event::GameEventType;
 
 #[derive(Debug)]
 pub struct CryobayRoom {
