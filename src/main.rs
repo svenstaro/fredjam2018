@@ -333,6 +333,9 @@ fn main() -> Result<(), io::Error> {
                         }
                     }
                 }
+                Action::Audio(action) => {
+                    snd_send.send(action);
+                }
                 Action::Attack => {
                     let damage = app.state.player.attack_strength;
                     let mut enemy_option = app.state.get_current_enemy_mut(app.state.current_room);
