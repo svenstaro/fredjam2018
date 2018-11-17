@@ -19,6 +19,7 @@ use tui::Terminal;
 use unicode_width::UnicodeWidthStr;
 
 mod action;
+mod commands;
 mod enemy;
 mod event;
 mod event_queue;
@@ -29,17 +30,16 @@ mod sound;
 mod state;
 mod timer;
 mod utils;
-mod commands;
 
 use crate::action::{Action, ActionHandled};
+use crate::commands::try_handle_command;
+use crate::enemy::Enemy;
 use crate::event::{Event, Events};
 use crate::event_queue::EventQueue;
 use crate::game_event::{GameEvent, GameEventType};
 use crate::rooms::{room_intro_text, CryobayRoom, Room, RoomType, SlushLobbyRoom};
 use crate::state::State;
-use crate::timer::Timer;
 use crate::utils::{duration_to_msec_u64, BoxShape};
-use crate::commands::{try_handle_command};
 
 #[derive(Debug)]
 pub struct App {
@@ -301,7 +301,8 @@ fn main() -> Result<(), io::Error> {
                 }
                 Action::Command(tokens) => app.try_handle_command(tokens),
                 Action::EnemyAttack => {
-                    if let Some(ref enemy) = app.state.enemy {
+                    let enemy_option = { app.state.get_current_enemy(app.state.current_room) };
+                    if let Some(ref enemy) = enemy_option {
                         app.state.player.health -= enemy.get_attack_strength();
                         if app.state.player.health <= 0 {
                             app.event_queue.schedule_action(Action::PlayerDied);
