@@ -12,7 +12,7 @@ use tui::Terminal;
 use unicode_width::UnicodeWidthStr;
 use std::thread;
 use std::sync::mpsc::channel;
-use self::sound::{AudioEvent, Effect};
+use self::sound::{AudioEvent, Effect, Track};
 
 mod action;
 mod state;
@@ -172,6 +172,7 @@ fn main() -> Result<(), io::Error> {
                 Key::Char('\n') => {
                     let mut content: String = app.input.drain(..).collect();
                     let command = Action::Command(content.clone());
+                    snd_send.send(AudioEvent::Track(Track::Intro));
                     content.push('\n');
                     app.log.push(GameEvent {
                         content,
