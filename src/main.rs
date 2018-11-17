@@ -14,6 +14,8 @@ use tui::widgets::canvas::Canvas;
 use tui::widgets::{Block, Borders, Paragraph, Text, Widget};
 use tui::Terminal;
 use unicode_width::UnicodeWidthStr;
+#[macro_use]
+extern crate strum_macros;
 
 mod action;
 mod enemy;
