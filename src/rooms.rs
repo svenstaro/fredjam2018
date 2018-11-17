@@ -40,6 +40,19 @@ impl Room for CryobayRoom {
         action: &Action,
     ) -> bool {
         match action {
+            Action::Enter(room_type) => {
+                match room_type {
+                    RoomType::Cryobay => {
+                        let rat = GenericEnemy::new(EnemyType::Rat, 5, 1, 60*1000);
+                        let timer = rat.get_attack_timer();
+                        event_queue.schedule_timer(timer);
+                        state.enemy = Some(Box::new(rat));
+
+                        false
+                    }
+                    _ => false
+                }
+            }
             Action::Command(command) => {
                 // TODO Maybe there's a better approach to finding the current room...
                 match state.current_room {
@@ -120,13 +133,14 @@ impl Room for SlushLobbyRoom {
                         let timer = rat.get_attack_timer();
                         event_queue.schedule_timer(timer);
                         state.enemy = Some(Box::new(rat));
+
+                        false
                     }
-                    _ => {}
+                    _ => false,
                 }
             }
-            _ => {},
+            _ => return false,
         }
-        false
     }
 }
 
