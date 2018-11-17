@@ -1,6 +1,4 @@
 use crate::action::Action;
-use crate::event_queue::EventQueue;
-use std::collections::HashMap;
 
 #[derive(Debug, Clone)]
 pub struct Timer {
