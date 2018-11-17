@@ -1,7 +1,15 @@
 use crate::action::Action;
 
+#[derive(Debug, Clone, PartialEq, Eq)]
+pub enum TimerType {
+    Combat,
+    Oxygen,
+    Storytime,
+}
+
 #[derive(Debug, Clone)]
 pub struct Timer {
+    pub timer_type: TimerType,
     pub label: String,
     pub elapsed: u64,
     pub duration: u64,
@@ -10,8 +18,9 @@ pub struct Timer {
 }
 
 impl Timer {
-    pub fn new(label: &str, elapsed: u64, duration: u64, action: Action, is_visual: bool) -> Self {
+    pub fn new(timer_type: TimerType, label: &str, elapsed: u64, duration: u64, action: Action, is_visual: bool) -> Self {
         Timer {
+            timer_type,
             label: label.to_string(),
             elapsed,
             duration,
