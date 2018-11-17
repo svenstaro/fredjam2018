@@ -16,6 +16,8 @@ pub trait Enemy: Debug {
 
     fn reduce_health(&mut self, amount: i32) -> bool;
 
+    fn get_attack_strength(&self) -> i32;
+
     fn get_attack_timer(&self) -> Timer;
 }
 
@@ -60,6 +62,10 @@ impl Enemy for GenericEnemy {
         false
     }
 
+    fn get_attack_strength(&self) -> i32 {
+        self.attack_strength
+    }
+
     fn get_attack_timer(&self) -> Timer {
         let mut timings = HashMap::new();
         timings.insert(
@@ -70,12 +76,13 @@ impl Enemy for GenericEnemy {
             ),
         );
         timings.insert(
-            10,
+            90,
             Action::Message(
                 String::from(format!("The {:?}'s attack is imminent", self.enemy_type)),
                 GameEventType::Success,
             ),
         );
+        timings.insert(100, Action::EnemyAttack);
 
         Timer::new(
             &format!("{:?} attack timer", self.enemy_type),
