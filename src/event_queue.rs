@@ -22,11 +22,12 @@ impl EventQueue {
             timer.tick(dt);
         }
 
-        // for timer in self.timers.iter_mut() {
-        //     if timer.is_done() {
-        //         self.schedule_action(timer.action);
-        //     }
-        // }
+        let cloned_timers = self.timers.clone();
+        for timer in cloned_timers {
+            if timer.is_done() {
+                self.schedule_action(timer.action);
+            }
+        }
 
         self.timers.retain(|x| !x.is_done());
     }

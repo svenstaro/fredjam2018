@@ -2,7 +2,7 @@ use crate::action::Action;
 use crate::event_queue::EventQueue;
 use std::collections::HashMap;
 
-#[derive(Debug)]
+#[derive(Debug, Clone)]
 pub struct Timer {
     pub label: String,
     pub elapsed: u64,
