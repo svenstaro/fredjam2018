@@ -14,7 +14,7 @@ pub trait Room: Debug {
 #[derive(Debug, PartialEq, Eq, Hash)]
 pub enum RoomType {
     Cryobay,
-    Locked,
+    SlushLobby,
 }
 
 // Initial room.
@@ -34,8 +34,8 @@ impl Room for CryobayRoom {
             Action::Enter(room) => match room {
                 RoomType::Cryobay => {
                     event_queue.schedule_action(Action::Message(
-                        String::from(include_str!("../assets/rooms/cryobay_enter.txt")),
-                        GameEventType::Success,
+                        String::from(room_intro_text(RoomType::Cryobay)),
+                        GameEventType::Normal,
                     ));
                     true
                 }
@@ -75,7 +75,7 @@ impl Room for CryobayRoom {
                                     GameEventType::Success,
                                 ));
                                 event_queue.schedule_action(Action::Leave(RoomType::Cryobay));
-                                event_queue.schedule_action(Action::Enter(RoomType::Locked));
+                                event_queue.schedule_action(Action::Enter(RoomType::SlushLobby));
                                 true
                             } else {
                                 event_queue.schedule_action(Action::Message(
@@ -98,9 +98,9 @@ impl Room for CryobayRoom {
 
 // Second room room, locked per default, lever needs to be pulled.
 #[derive(Debug)]
-pub struct LockedRoom;
+pub struct SlushLobbyRoom;
 
-impl Room for LockedRoom {
+impl Room for SlushLobbyRoom {
     fn handle_action(
         &mut self,
         state: &mut State,
@@ -109,12 +109,10 @@ impl Room for LockedRoom {
     ) -> bool {
         match action {
             Action::Enter(room) => match room {
-                RoomType::Locked => {
+                RoomType::SlushLobby => {
                     event_queue.schedule_action(Action::Message(
-                        String::from(
-                            "Success, you have entered the second and final room! You win!",
-                        ),
-                        GameEventType::Success,
+                        String::from(room_intro_text(RoomType::SlushLobby)),
+                        GameEventType::Normal,
                     ));
                     true
                 }
@@ -122,5 +120,19 @@ impl Room for LockedRoom {
             },
             _ => false,
         }
+    }
+}
+
+fn room_game_name(room_type: RoomType) -> &'static str {
+    match room_type {
+        RoomType::Cryobay => "cryobay",
+        RoomType::SlushLobby => "slush lobby",
+    }
+}
+
+fn room_intro_text(room_type: RoomType) -> &'static str {
+    match room_type {
+        RoomType::Cryobay => include_str!("../assets/rooms/cryobay_enter.txt"),
+        RoomType::SlushLobby => include_str!("../assets/rooms/slush_lobby_enter.txt"),
     }
 }
