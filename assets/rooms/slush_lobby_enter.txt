@@ -1,5 +1,1 @@
-In the corner of the slush lobby, a pale figure is sitting, leaned against the wall. "Thank god! I thought I was the only one." He is holding his side, there are some red smears on the wall behind him.
-"Do you have any idea what happened?" he asks. "I was in the next room when the lights went out. Something attacked me in the dark. I managed to shut the door, but I couldn't stop the bleeding from its bite..." his gaze trails off into the distance.
-
-"Dear Passengers," the voice that had to belong to the ship's AI started. "An unexpe-" backtracking, she started again: "I have found a way to route failover energy to your wing. Please report to the bridge for further instructions."
-At one side of the room, you see a door with a label saying "cryocontrol". You here faint rustling on the other side.
+You're back in the slush lobby.

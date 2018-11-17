@@ -1,14 +1,16 @@
+use crate::entities::enemy::{EnemyType, GenericEnemy};
+use crate::room::{Room, RoomType};
 use crate::EventQueue;
 use crate::{Action, ActionHandled, State};
-use crate::room::{Room, RoomType};
-use crate::entities::enemy::{EnemyType, GenericEnemy};
 
 #[derive(Debug)]
-pub struct CorridorRoom {}
+pub struct CorridorRoom {
+    pub visited: bool,
+}
 
 impl CorridorRoom {
     pub fn new() -> CorridorRoom {
-        CorridorRoom {}
+        CorridorRoom { visited: false }
     }
 }
 
@@ -21,6 +23,12 @@ impl Room for CorridorRoom {
     ) -> ActionHandled {
         ActionHandled::NotHandled
     }
+
+    fn visit(&mut self) {
+        self.visited = true;
+    }
+
+    fn is_visited(&self) -> bool {
+        self.visited
+    }
 }
-
-

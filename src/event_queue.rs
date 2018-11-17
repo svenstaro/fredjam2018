@@ -1,5 +1,5 @@
 use crate::action::Action;
-use crate::timer::Timer;
+use crate::timer::{Timer, TimerType};
 use std::collections::VecDeque;
 
 #[derive(Debug, Default)]
@@ -13,8 +13,20 @@ impl EventQueue {
         self.actions.push_back(action);
     }
 
+    pub fn schedule_actions(&mut self, actions: Vec<Action>) {
+        for action in actions {
+            self.actions.push_back(action);
+        }
+    }
+
     pub fn schedule_timer(&mut self, timer: Timer) {
         self.timers.push(timer);
+    }
+
+    pub fn schedule_timers(&mut self, timers: Vec<Timer>) {
+        for timer in timers {
+            self.timers.push(timer);
+        }
     }
 
     pub fn tick(&mut self, dt: u64) {
@@ -38,5 +50,18 @@ impl EventQueue {
 
     pub fn get_next_action(&mut self) -> Option<Action> {
         self.actions.pop_front()
+    }
+
+    pub fn get_timers(&self, timer_type: TimerType) -> Vec<Timer> {
+        self.timers
+            .clone()
+            .into_iter()
+            .filter(|timer| timer.timer_type == timer_type)
+            .collect::<Vec<Timer>>()
+    }
+
+    pub fn emplace_timers(&mut self, timer_type: TimerType, emplacement: Vec<Timer>) {
+        self.timers.retain(|timer| timer.timer_type != timer_type);
+        self.timers.extend(emplacement);
     }
 }

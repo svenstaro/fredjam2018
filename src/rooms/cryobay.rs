@@ -1,16 +1,20 @@
+use crate::game_event::GameEventType;
+use crate::room::{Room, RoomType};
 use crate::EventQueue;
 use crate::{Action, ActionHandled, State};
-use crate::room::{Room, RoomType};
-use crate::game_event::GameEventType;
 
 #[derive(Debug)]
 pub struct CryobayRoom {
+    pub visited: bool,
     pub lever: bool,
 }
 
 impl CryobayRoom {
     pub fn new() -> CryobayRoom {
-        CryobayRoom { lever: false }
+        CryobayRoom {
+            visited: false,
+            lever: false,
+        }
     }
 }
 
@@ -74,5 +78,13 @@ impl Room for CryobayRoom {
             }
             _ => ActionHandled::NotHandled,
         }
+    }
+
+    fn visit(&mut self) {
+        self.visited = true;
+    }
+
+    fn is_visited(&self) -> bool {
+        self.visited
     }
 }
