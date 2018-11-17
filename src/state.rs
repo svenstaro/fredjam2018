@@ -24,7 +24,11 @@ impl State {
         }
     }
 
-    pub fn get_current_enemy(&mut self, room_type: RoomType) -> Option<&mut Box<Enemy>> {
+    pub fn get_current_enemy(&self, room_type: RoomType) -> Option<&Box<Enemy>> {
+        self.enemies.get(&room_type)
+    }
+
+    pub fn get_current_enemy_mut(&mut self, room_type: RoomType) -> Option<&mut Box<Enemy>> {
         self.enemies.get_mut(&room_type)
     }
 }
