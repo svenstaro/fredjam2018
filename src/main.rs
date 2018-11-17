@@ -320,17 +320,18 @@ fn main() -> Result<(), io::Error> {
                 Action::Command(tokens) => app.try_handle_command(tokens),
                 Action::EnemyAttack => {
                     let enemy_option = { app.state.get_current_enemy(app.state.current_room) };
-                    if let Some(ref enemy) = enemy_option {
+                    if let Some(enemy) = enemy_option {
                         app.state.player.health -= enemy.get_attack_strength();
-                        app.log.push_front(GameEvent {
-                            content: format!(
-                                "{:?} attacks you! You lose {} HP, you now have {} HP\n",
-                                enemy.get_enemy_type(),
-                                enemy.get_attack_strength(),
-                                app.state.player.health,
-                            ),
-                            game_event_type: GameEventType::Combat,
-                        });
+                        // TODO Alex will fix this!!!
+                        // app.log.push_front(GameEvent {
+                        //     content: format!(
+                        //         "{:?} attacks you! You lose {} HP, you now have {} HP\n",
+                        //         enemy.get_enemy_type(),
+                        //         enemy.get_attack_strength(),
+                        //         app.state.player.health,
+                        //     ),
+                        //     game_event_type: GameEventType::Combat,
+                        // });
                         if app.state.player.health <= 0 {
                             app.event_queue.schedule_action(Action::PlayerDied);
                         }
