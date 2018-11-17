@@ -1,4 +1,4 @@
-use std::collections::{HashMap, VecDeque};
+use std::collections::HashMap;
 use std::io::{self, Write};
 use termion::cursor::Goto;
 use termion::event::Key;
@@ -14,73 +14,22 @@ use std::thread;
 use std::sync::mpsc::channel;
 use self::sound::{AudioEvent, Effect};
 
+mod action;
+mod state;
 mod event;
 mod sound;
 mod rooms;
 mod utils;
+mod game_event;
+mod event_queue;
 
+use crate::action::Action;
+use crate::state::State;
+use crate::game_event::{GameEvent, GameEventType};
+use crate::event_queue::EventQueue;
 use crate::event::{Event, Events};
 use crate::rooms::{LockedRoom, Room, RoomType, WakeUpRoom};
 use crate::utils::BoxShape;
-
-#[derive(Debug, PartialEq, Eq, Hash)]
-pub enum GameEventType {
-    Combat,
-    Normal,
-    Success,
-    Failure,
-    Debug,
-}
-
-#[derive(Debug)]
-pub struct GameEvent {
-    pub content: String,
-    pub game_event_type: GameEventType,
-}
-
-// TODO Extend this to have timers (if needed?)
-#[derive(Debug, PartialEq, Eq, Hash)]
-pub enum Action {
-    // String is room name.
-    Enter(RoomType),
-    Tick(u32),
-    // String is room name.
-    Leave(RoomType),
-    Message(String, GameEventType),
-    Command(String),
-}
-
-#[derive(Debug)]
-pub struct State {
-    pub current_room: RoomType,
-}
-
-impl State {
-    fn new() -> Self {
-        State {
-            current_room: RoomType::WakeUp,
-        }
-    }
-}
-
-#[derive(Debug, Default)]
-pub struct EventQueue {
-    pub actions: VecDeque<Action>,
-}
-
-impl EventQueue {
-    pub fn schedule_action(&mut self, action: Action) {
-        self.actions.push_back(action);
-    }
-
-    pub fn is_empty(&self) -> bool {
-        self.actions.is_empty()
-    }
-
-    pub fn get_next_action(&mut self) -> Option<Action> {
-        self.actions.pop_front()
-    }
-}
 
 #[derive(Debug)]
 pub struct App {

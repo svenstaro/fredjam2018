@@ -1,9 +1,5 @@
-use rodio::source::Source;
-use std::fs::File;
-use std::io::{BufReader, Cursor};
+use std::io::Cursor;
 use rodio::{self, Sink};
-use std::time::Duration;
-use std::thread;
 use std::sync::mpsc::Receiver;
 use rodio::dynamic_mixer::mixer;
 use rodio::source::Zero;
