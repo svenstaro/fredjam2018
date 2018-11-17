@@ -6,11 +6,11 @@ pub struct Timer {
     label: String,
     elapsed: u64,
     duration: u64,
-    timings: HashMap<u64, Action>,
+    timings: HashMap<u8, Action>,
 }
 
 impl Timer {
-    pub fn new(label: &str, elapsed: u64, duration: u64, timings: HashMap<u64, Action>) -> Self {
+    pub fn new(label: &str, elapsed: u64, duration: u64, timings: HashMap<u8, Action>) -> Self {
         Timer {
             label: label.to_string(),
             elapsed,
