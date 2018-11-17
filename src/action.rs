@@ -1,5 +1,5 @@
 use crate::game_event::GameEventType;
-use crate::rooms::RoomType;
+use crate::room::RoomType;
 
 pub enum ActionHandled {
     Handled,
@@ -8,6 +8,8 @@ pub enum ActionHandled {
 
 #[derive(Debug, PartialEq, Eq, Hash, Clone)]
 pub enum Action {
+    // Do nothing.
+    Nop,
     // String is room name.
     Enter(RoomType),
     Tick(u64),

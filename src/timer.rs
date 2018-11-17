@@ -1,6 +1,4 @@
 use crate::action::Action;
-use crate::event_queue::EventQueue;
-use std::collections::HashMap;
 
 #[derive(Debug, Clone)]
 pub struct Timer {
@@ -27,7 +25,7 @@ impl Timer {
     }
 
     pub fn current_percent(&self) -> u8 {
-        (self.duration / self.elapsed) as u8
+        (self.elapsed * 100 / self.duration) as u8
     }
 
     pub fn is_done(&self) -> bool {
