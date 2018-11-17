@@ -40,6 +40,12 @@ pub fn room_intro_text(room_type: RoomType) -> &'static str {
     }
 }
 
+pub fn reading_time_msecs(room_type: RoomType) -> u64 {
+    let msg = room_intro_text(room_type);
+    // 0.05 of a second for every character, times 1000 to convert to msecs
+    (msg.len() as f64 * 0.05 * 1000.0).floor() as u64
+}
+
 pub fn adjacent_rooms(room_type: RoomType) -> Vec<RoomType> {
     match room_type {
         RoomType::Cryobay => vec![RoomType::SlushLobby],
@@ -63,7 +69,7 @@ pub fn enter_room(app: &mut App, room_type: RoomType) {
     let enemy_option = app.state.get_current_enemy(room_type);
     match enemy_option {
         Some(enemy) => {
-            let timers = enemy.get_attack_timers();
+            let timers = enemy.get_initial_attack_timers(reading_time_msecs(room_type));
             app.event_queue.schedule_timers(timers);
         }
         None => (),
