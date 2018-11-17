@@ -137,8 +137,8 @@ fn main() -> Result<(), io::Error> {
                     let style = match game_event.game_event_type {
                         GameEventType::Combat => Style::default().fg(Color::Red),
                         GameEventType::Normal => Style::default(),
-                        GameEventType::Success => Style::default(),
-                        GameEventType::Failure => Style::default(),
+                        GameEventType::Success => Style::default().fg(Color::Green),
+                        GameEventType::Failure => Style::default().fg(Color::Red),
                     };
                     log.push(Text::styled(game_event.content.clone(), style));
                 }
