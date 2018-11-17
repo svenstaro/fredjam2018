@@ -19,6 +19,9 @@ use tui::Terminal;
 use unicode_width::UnicodeWidthStr;
 use std::ops::Add;
 
+#[macro_use]
+extern crate strum_macros;
+
 mod action;
 mod enemy;
 mod event;
