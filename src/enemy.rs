@@ -68,28 +68,26 @@ impl Enemy for GenericEnemy {
     }
 
     fn get_attack_timer(&self) -> Timer {
-        let mut timings = HashMap::new();
-        timings.insert(
-            10,
-            Action::Message(
-                String::from(format!("The {:?} prepares to attack you.", self.enemy_type)),
-                GameEventType::Success,
-            ),
-        );
-        timings.insert(
-            90,
-            Action::Message(
-                String::from(format!("The {:?}'s attack is imminent", self.enemy_type)),
-                GameEventType::Success,
-            ),
-        );
-        timings.insert(100, Action::EnemyAttack);
-
         Timer::new(
             &format!("{:?} attack timer", self.enemy_type),
-            self.timer_length,
             0,
-            timings,
+            self.timer_length,
+            Action::Message(
+                String::from(format!("The {:?} is preparing to attack you.", self.enemy_type)),
+                GameEventType::Success,
+            ),
+            true,
         )
+        //
+        // Timer::new(
+        //     &format!("{:?} attack timer", self.enemy_type),
+        //     0,
+        //     self.timer_length,
+        //     Action::Message(
+        //         String::from(format!("The {:?}'s attack is imminent", self.enemy_type)),
+        //         GameEventType::Success,
+        //     ),
+        //     true,
+        // )
     }
 }

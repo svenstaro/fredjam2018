@@ -6,8 +6,7 @@ pub enum ActionHandled {
     NotHandled,
 }
 
-// TODO Extend this to have timers (if needed?)
-#[derive(Debug, PartialEq, Eq, Hash)]
+#[derive(Debug, PartialEq, Eq, Hash, Clone)]
 pub enum Action {
     // String is room name.
     Enter(RoomType),
