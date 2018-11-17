@@ -42,6 +42,7 @@ use crate::event_queue::EventQueue;
 use crate::game_event::{GameEvent, GameEventType};
 use crate::room::{enter_room, Room, RoomType};
 use crate::rooms::{CryobayRoom, SlushLobbyRoom};
+use crate::timer::TimerType;
 
 use crate::state::State;
 use crate::utils::{duration_to_msec_u64, BoxShape};
@@ -87,10 +88,9 @@ impl App {
         ActionHandled::NotHandled
     }
 
-    pub fn try_handle_command(&mut self, tokens: String) -> () {
-        for action in try_handle_command(tokens, &self.state) {
-            self.event_queue.schedule_action(action);
-        }
+    pub fn try_handle_command(&mut self, tokens: String) {
+        let actions = try_handle_command(tokens, &self.state);
+        self.event_queue.schedule_actions(actions);
     }
 }
 
@@ -333,10 +333,52 @@ fn main() -> Result<(), io::Error> {
                         }
                     }
                 }
+                Action::Attack => {
+                    let damage = app.state.player.attack_strength;
+                    let mut enemy_option = app.state.get_current_enemy_mut(app.state.current_room);
+                    match enemy_option {
+                        Some(ref mut enemy) => {
+                            enemy.reduce_health(damage);
+                            if enemy.get_health() <= 0 {
+                                app.state.enemies.remove(&app.state.current_room);
+                                app.event_queue.schedule_action(Action::Message(
+                                        String::from("The enemy has been slain."),
+                                        GameEventType::Failure,
+                                        ));
+                                app.event_queue.emplace_timers(TimerType::EnemyAttack, vec![]);
+                            }
+                        }
+                        None => {
+                            app.event_queue.schedule_action(Action::Message(
+                                    String::from("There is nothing you can attack."),
+                                    GameEventType::Failure,
+                                    ));
+                        },
+                    };
+                }
                 Action::PlayerDied => {
                     app.event_queue.schedule_action(Action::Message(
                         String::from("You died."),
                         GameEventType::Failure,
+                    ));
+                }
+                Action::Dodge => {
+                    let mut attack_timers = app.event_queue.get_timers(TimerType::EnemyAttack);
+                    for elem in attack_timers.iter_mut() {
+                        elem.elapsed = 0;
+                    }
+                    app.event_queue
+                        .emplace_timers(TimerType::EnemyAttack, attack_timers);
+
+                    let enemy_type = app
+                        .state
+                        .enemies
+                        .get(&app.state.current_room)
+                        .unwrap()
+                        .get_enemy_type();
+                    app.event_queue.schedule_action(Action::Message(
+                        String::from(format!("You dodge the {:?}'s attack.", enemy_type)),
+                        GameEventType::Success,
                     ));
                 }
                 Action::Tick(dt) => {
