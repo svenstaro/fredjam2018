@@ -62,6 +62,7 @@ pub fn room_type_from_name(room_name: &str) -> Option<RoomType> {
 }
 
 pub fn enter_room(app: &mut App, room_type: RoomType) {
+    app.rooms.get_mut(&room_type).unwrap().visit();
     let enemy_option = app.state.get_current_enemy(room_type);
     match enemy_option {
         Some(enemy) => {
