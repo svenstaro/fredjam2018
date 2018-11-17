@@ -14,7 +14,7 @@ pub trait Room: Debug {
     ) -> bool;
 }
 
-#[derive(Debug, PartialEq, Eq, Hash)]
+#[derive(Debug, PartialEq, Eq, Hash, Clone)]
 pub enum RoomType {
     Cryobay,
     SlushLobby,

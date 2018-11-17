@@ -1,8 +1,7 @@
 use crate::game_event::GameEventType;
 use crate::rooms::RoomType;
 
-// TODO Extend this to have timers (if needed?)
-#[derive(Debug, PartialEq, Eq, Hash)]
+#[derive(Debug, PartialEq, Eq, Hash, Clone)]
 pub enum Action {
     // String is room name.
     Enter(RoomType),
