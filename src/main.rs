@@ -1,5 +1,5 @@
 use self::sound::{AudioEvent, Effect, Track};
-use std::collections::HashMap;
+use std::collections::{HashMap, VecDeque};
 use std::io::{self, Write};
 use std::sync::mpsc::channel;
 use std::thread;
@@ -36,7 +36,7 @@ use crate::utils::{duration_to_msec_u64, BoxShape};
 #[derive(Debug)]
 pub struct App {
     pub size: Rect,
-    pub log: Vec<GameEvent>,
+    pub log: VecDeque<GameEvent>,
     pub input: String,
     pub state: State,
     pub rooms: HashMap<RoomType, Box<Room>>,
@@ -47,7 +47,7 @@ impl App {
     fn new(state: State) -> Self {
         App {
             size: Default::default(),
-            log: vec![],
+            log: VecDeque::new(),
             input: "".into(),
             state: state,
             rooms: HashMap::new(),
@@ -101,6 +101,7 @@ fn main() -> Result<(), io::Error> {
             app.size = size;
         }
 
+        // Draw.
         terminal.draw(|mut f| {
             let h_chunks = Layout::default()
                 .direction(Direction::Horizontal)
@@ -183,7 +184,7 @@ fn main() -> Result<(), io::Error> {
                     let command = Action::Command(content.clone());
                     snd_send.send(AudioEvent::Track(Track::Intro));
                     content.push('\n');
-                    app.log.push(GameEvent {
+                    app.log.push_front(GameEvent {
                         content,
                         game_event_type: GameEventType::Normal,
                     });
@@ -216,7 +217,7 @@ fn main() -> Result<(), io::Error> {
             match next_action {
                 Action::Message(mut message, game_event_type) => {
                     message.push('\n');
-                    app.log.push(GameEvent {
+                    app.log.push_front(GameEvent {
                         content: message,
                         game_event_type,
                     })
@@ -230,7 +231,7 @@ fn main() -> Result<(), io::Error> {
                 Action::Tick(dt) => {
                     app.event_queue.tick(dt);
                 }
-                _ => app.log.push(GameEvent {
+                _ => app.log.push_front(GameEvent {
                     content: String::from("Unhandled action!\n"),
                     game_event_type: GameEventType::Debug,
                 }),
