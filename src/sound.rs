@@ -4,10 +4,12 @@ use rodio::Decoder;
 use rodio::Sample;
 use rodio::Source;
 use rodio::{self, Sink};
+use std::collections::HashMap;
 use std::io::Cursor;
 use std::sync::mpsc::Receiver;
 use std::sync::{Arc, Mutex};
 use std::time::Duration;
+use strum::IntoEnumIterator;
 
 #[derive(Clone, Copy, PartialEq, Eq, Debug)]
 pub enum AudioEvent {
@@ -20,7 +22,7 @@ pub enum Effect {
     BeepLong,
 }
 
-#[derive(Clone, Copy, PartialEq, Eq, Debug)]
+#[derive(Clone, Copy, PartialEq, Eq, Debug, EnumIter, Hash)]
 pub enum Track {
     Intro,
 }
@@ -28,6 +30,7 @@ pub enum Track {
 struct MusicPlayback {
     track: Arc<Mutex<Track>>,
     inner_source: Box<Source<Item = i16> + Send>,
+    data_cursors: HashMap<Track, Decoder<Cursor<&'static [u8]>>>,
 }
 
 struct MusicPlaybackController {
@@ -45,10 +48,18 @@ impl MusicPlaybackController {
 impl MusicPlayback {
     fn create() -> (Self, MusicPlaybackController) {
         let track = Arc::new(Mutex::new(Track::Intro));
+        let mut cursors = HashMap::new();
+        for track in Track::iter() {
+            cursors.insert(
+                track,
+                rodio::Decoder::new(AudioEvent::Track(track).data_cursor()).unwrap(),
+            );
+        }
         (
             MusicPlayback {
                 track: track.clone(),
                 inner_source: Box::new(Zero::new(2, 44800)),
+                data_cursors: cursors,
             },
             MusicPlaybackController { track: track },
         )
@@ -57,15 +68,18 @@ impl MusicPlayback {
 
 impl Source for MusicPlayback {
     fn current_frame_len(&self) -> Option<usize> {
-        self.inner_source.current_frame_len()
+        let decoder = self.data_cursors.get(&*self.track.lock().unwrap()).unwrap();
+        decoder.current_frame_len()
     }
 
     fn channels(&self) -> u16 {
-        self.inner_source.channels()
+        let decoder = self.data_cursors.get(&*self.track.lock().unwrap()).unwrap();
+        decoder.channels()
     }
 
     fn sample_rate(&self) -> u32 {
-        self.inner_source.sample_rate()
+        let decoder = self.data_cursors.get(&*self.track.lock().unwrap()).unwrap();
+        decoder.sample_rate()
     }
 
     fn total_duration(&self) -> Option<Duration> {
@@ -77,7 +91,8 @@ impl Iterator for MusicPlayback {
     type Item = i16;
 
     fn next(&mut self) -> Option<i16> {
-        self.inner_source.next()
+        let mut decoder_option = self.data_cursors.get_mut(&*self.track.lock().unwrap());
+        decoder_option.and_then(|dec| dec.next())
     }
 }
 

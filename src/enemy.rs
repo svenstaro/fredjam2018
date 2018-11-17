@@ -1,6 +1,7 @@
-use std::collections::HashMap;
 use std::fmt::Debug;
 
+use crate::rooms::RoomType;
+use crate::state::State;
 use crate::timer::Timer;
 use crate::{Action, GameEventType};
 
@@ -90,4 +91,9 @@ impl Enemy for GenericEnemy {
             )
         ]
     }
+}
+
+pub fn initialize_enemies(state: &mut State) {
+    let rat = GenericEnemy::new(EnemyType::Rat, 5, 1, 60 * 1000);
+    state.enemies.insert(RoomType::SlushLobby, Box::new(rat));
 }

@@ -4,6 +4,7 @@ use self::sound::{AudioEvent, Effect, Track};
 use num::clamp;
 use std::collections::{HashMap, VecDeque};
 use std::io::{self, Write};
+use std::ops::Add;
 use std::sync::mpsc::channel;
 use std::thread;
 use std::time::Instant;
@@ -18,7 +19,11 @@ use tui::widgets::{Block, Borders, Gauge, Paragraph, Text, Widget};
 use tui::Terminal;
 use unicode_width::UnicodeWidthStr;
 
+#[macro_use]
+extern crate strum_macros;
+
 mod action;
+mod commands;
 mod enemy;
 mod event;
 mod event_queue;
@@ -31,12 +36,15 @@ mod timer;
 mod utils;
 
 use crate::action::{Action, ActionHandled};
+use crate::commands::try_handle_command;
+use crate::enemy::Enemy;
 use crate::event::{Event, Events};
 use crate::event_queue::EventQueue;
 use crate::game_event::{GameEvent, GameEventType};
-use crate::rooms::{room_intro_text, CryobayRoom, Room, RoomType, SlushLobbyRoom};
+use crate::rooms::{
+    adjacent_rooms, room_game_name, room_intro_text, CryobayRoom, Room, RoomType, SlushLobbyRoom,
+};
 use crate::state::State;
-use crate::timer::Timer;
 use crate::utils::{duration_to_msec_u64, BoxShape};
 
 #[derive(Debug)]
@@ -78,6 +86,12 @@ impl App {
         }
 
         ActionHandled::NotHandled
+    }
+
+    pub fn try_handle_command(&mut self, tokens: String) -> () {
+        for action in try_handle_command(tokens, &self.state) {
+            self.event_queue.schedule_action(action);
+        }
     }
 }
 
@@ -168,7 +182,7 @@ fn main() -> Result<(), io::Error> {
                 log
             };
             Paragraph::new(styled_log.iter())
-                .block(Block::default().borders(Borders::ALL).title("Log"))
+                .block(Block::default().borders(Borders::ALL).title("Events"))
                 .wrap(true)
                 .render(&mut f, v_chunks_left[1]);
             Paragraph::new([Text::raw(&app.input)].iter())
@@ -242,15 +256,17 @@ fn main() -> Result<(), io::Error> {
                     break;
                 }
                 Key::Char('\n') => {
-                    let mut content: String = app.input.drain(..).collect();
-                    let command = Action::Command(content.clone());
-                    snd_send.send(AudioEvent::Track(Track::Intro));
-                    content.push('\n');
-                    app.log.push_front(GameEvent {
-                        content,
-                        game_event_type: GameEventType::Normal,
-                    });
-                    app.event_queue.schedule_action(command);
+                    if !app.input.is_empty() {
+                        let mut content: String = app.input.drain(..).collect();
+                        let command = Action::Command(content.clone());
+                        snd_send.send(AudioEvent::Track(Track::Intro));
+                        content.push('\n');
+                        app.log.push_front(GameEvent {
+                            content,
+                            game_event_type: GameEventType::Normal,
+                        });
+                        app.event_queue.schedule_action(command);
+                    }
                 }
                 Key::Char(c) => {
                     snd_send.send(AudioEvent::Effect(Effect::BeepLong));
@@ -285,13 +301,26 @@ fn main() -> Result<(), io::Error> {
                     })
                 }
                 Action::Enter(room) => {
+                    app.state.current_room = room;
+                    let available_rooms = adjacent_rooms(room);
+                    let mut door_msg = String::from("\n\nYou see ")
+                        + &available_rooms.len().to_string()
+                        + " doors labeled:\n";
+                    for room in available_rooms {
+                        door_msg += "  - ";
+                        door_msg += room_game_name(room);
+                        door_msg += "\n";
+                    }
                     app.event_queue.schedule_action(Action::Message(
-                        String::from(room_intro_text(room)),
+                        String::from(room_intro_text(room).to_owned() + &door_msg),
                         GameEventType::Normal,
                     ));
                 }
+                Action::Leave(_) => {}
+                Action::Command(tokens) => app.try_handle_command(tokens),
                 Action::EnemyAttack => {
-                    if let Some(ref enemy) = app.state.enemy {
+                    let enemy_option = { app.state.get_current_enemy(app.state.current_room) };
+                    if let Some(ref enemy) = enemy_option {
                         app.state.player.health -= enemy.get_attack_strength();
                         app.log.push_front(GameEvent {
                             content: format!(
@@ -313,7 +342,6 @@ fn main() -> Result<(), io::Error> {
                         GameEventType::Failure,
                     ));
                 }
-
                 Action::Tick(dt) => {
                     app.event_queue.tick(dt);
                 }

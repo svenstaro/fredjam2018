@@ -3,7 +3,8 @@ use std::fmt::Debug;
 use crate::enemy::Enemy;
 use crate::enemy::{EnemyType, GenericEnemy};
 use crate::EventQueue;
-use crate::{Action, ActionHandled, GameEventType, State};
+use crate::{Action, ActionHandled, State};
+use crate::game_event::{GameEvent, GameEventType};
 
 pub trait Room: Debug {
     fn handle_action(
@@ -14,10 +15,11 @@ pub trait Room: Debug {
     ) -> ActionHandled;
 }
 
-#[derive(Debug, PartialEq, Eq, Hash, Clone)]
+#[derive(Debug, PartialEq, Eq, Hash, Clone, Copy)]
 pub enum RoomType {
     Cryobay,
     SlushLobby,
+    Cryocontrol,
 }
 
 // Initial room.
@@ -47,7 +49,7 @@ impl Room for CryobayRoom {
                     for timer in timers {
                         event_queue.schedule_timer(timer);
                     }
-                    state.enemy = Some(Box::new(rat));
+                    state.enemies.insert(RoomType::Cryobay, Box::new(rat));
 
                     ActionHandled::NotHandled
                 }
@@ -133,7 +135,7 @@ impl Room for SlushLobbyRoom {
                     for timer in timers {
                         event_queue.schedule_timer(timer);
                     }
-                    state.enemy = Some(Box::new(rat));
+                    state.enemies.insert(RoomType::Cryobay, Box::new(rat));
 
                     ActionHandled::NotHandled
                 }
@@ -148,6 +150,7 @@ pub fn room_game_name(room_type: RoomType) -> &'static str {
     match room_type {
         RoomType::Cryobay => "cryobay",
         RoomType::SlushLobby => "slush lobby",
+        RoomType::Cryocontrol => "cryocontrol",
     }
 }
 
@@ -155,5 +158,23 @@ pub fn room_intro_text(room_type: RoomType) -> &'static str {
     match room_type {
         RoomType::Cryobay => include_str!("../assets/rooms/cryobay_enter.txt"),
         RoomType::SlushLobby => include_str!("../assets/rooms/slush_lobby_enter.txt"),
+        RoomType::Cryocontrol => include_str!("../assets/rooms/cryocontrol_enter.txt"),
+    }
+}
+
+pub fn adjacent_rooms(room_type: RoomType) -> Vec<RoomType> {
+    match room_type {
+        RoomType::Cryobay => vec![RoomType::SlushLobby],
+        RoomType::SlushLobby => vec![RoomType::Cryobay, RoomType::Cryocontrol],
+        RoomType::Cryocontrol => vec![RoomType::SlushLobby],
+    }
+}
+
+pub fn room_type_from_name(room_name: &str) -> Option<RoomType> {
+    match room_name {
+        "cryobay" => Some(RoomType::Cryobay),
+        "slush lobby" => Some(RoomType::SlushLobby),
+        "cryocontrol" => Some(RoomType::Cryocontrol),
+        _ => None,
     }
 }
