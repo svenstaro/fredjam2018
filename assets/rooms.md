@@ -23,7 +23,7 @@ At one side of the room, you see a door with a label saying "cryocontrol". You h
 ## cryocontrol
 You press the 'open' button next to the door to cryocontrol. The door vanishes, revealing a room bathed in red light. There are holos on the walls, some frantically flashing, some showing rapidly jumping readouts of cryo devices.
 
-fight:
+TODO fight:
   - bioengineered cleaning rat
   - should be easy to kill but still scary
 
