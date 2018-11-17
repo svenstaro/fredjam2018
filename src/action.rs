@@ -1,6 +1,11 @@
 use crate::game_event::GameEventType;
 use crate::rooms::RoomType;
 
+pub enum ActionHandled {
+    Handled,
+    NotHandled,
+}
+
 // TODO Extend this to have timers (if needed?)
 #[derive(Debug, PartialEq, Eq, Hash)]
 pub enum Action {

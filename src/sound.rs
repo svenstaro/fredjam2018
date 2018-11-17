@@ -6,8 +6,8 @@ use rodio::Source;
 use rodio::{self, Sink};
 use std::io::Cursor;
 use std::sync::mpsc::Receiver;
+use std::sync::{Arc, Mutex};
 use std::time::Duration;
-use std::sync::{Mutex, Arc};
 
 #[derive(Clone, Copy, PartialEq, Eq, Debug)]
 pub enum AudioEvent {
@@ -31,7 +31,7 @@ struct MusicPlayback {
 }
 
 struct MusicPlaybackController {
-    track: Arc<Mutex<Track>>
+    track: Arc<Mutex<Track>>,
 }
 
 impl MusicPlaybackController {
@@ -45,13 +45,13 @@ impl MusicPlaybackController {
 impl MusicPlayback {
     fn create() -> (Self, MusicPlaybackController) {
         let track = Arc::new(Mutex::new(Track::Intro));
-        (MusicPlayback {
-            track: track.clone(),
-            inner_source: Box::new(Zero::new(2, 44800)),
-        },
-        MusicPlaybackController{
-            track: track
-        })
+        (
+            MusicPlayback {
+                track: track.clone(),
+                inner_source: Box::new(Zero::new(2, 44800)),
+            },
+            MusicPlaybackController { track: track },
+        )
     }
 }
 
@@ -101,9 +101,10 @@ impl AudioEvent {
 pub fn start(recv: Receiver<AudioEvent>) {
     let device = rodio::default_output_device().unwrap();
     let sink = Sink::new(&device);
-    let (effect_mixer_controller, effect_mixer):
-        (std::sync::Arc<rodio::dynamic_mixer::DynamicMixerController<i16>>,
-         rodio::dynamic_mixer::DynamicMixer<i16>) = mixer(2, 44800);
+    let (effect_mixer_controller, effect_mixer): (
+        std::sync::Arc<rodio::dynamic_mixer::DynamicMixerController<i16>>,
+        rodio::dynamic_mixer::DynamicMixer<i16>,
+    ) = mixer(2, 44800);
     let (mut music, mut music_controller) = MusicPlayback::create();
 
     sink.append(effect_mixer);
@@ -115,10 +116,8 @@ pub fn start(recv: Receiver<AudioEvent>) {
             AudioEvent::Effect(_) => {
                 let source = rodio::Decoder::new(message.data_cursor()).unwrap();
                 effect_mixer_controller.add(source);
-            },
-            AudioEvent::Track(ref track) => {
-                music_controller.set_track(*track)
             }
+            AudioEvent::Track(ref track) => music_controller.set_track(*track),
         }
     }
 }

@@ -30,11 +30,12 @@ pub struct GenericEnemy {
 }
 
 impl GenericEnemy {
-    pub fn new(enemy_type: EnemyType,
-               health: i32,
-               attack_strength: i32,
-               timer_length: u64,
-               ) -> Self {
+    pub fn new(
+        enemy_type: EnemyType,
+        health: i32,
+        attack_strength: i32,
+        timer_length: u64,
+    ) -> Self {
         GenericEnemy {
             enemy_type,
             health,

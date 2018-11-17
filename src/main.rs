@@ -27,7 +27,7 @@ mod state;
 mod timer;
 mod utils;
 
-use crate::action::Action;
+use crate::action::{Action, ActionHandled};
 use crate::event::{Event, Events};
 use crate::event_queue::EventQueue;
 use crate::game_event::{GameEvent, GameEventType};
@@ -58,15 +58,16 @@ impl App {
     }
 
     // Return value indicates redraw required.
-    pub fn try_handle_room_action(&mut self, action: &Action) -> bool {
+    pub fn try_handle_room_action(&mut self, action: &Action) -> ActionHandled {
         // Try handling the action in a room, if that succeeds, then return true.
         for (_, ref mut room) in &mut self.rooms {
-            let handled = room.handle_action(&mut self.state, &mut self.event_queue, action);
-            if handled {
-                return true;
+            match room.handle_action(&mut self.state, &mut self.event_queue, action) {
+                ActionHandled::Handled => return ActionHandled::Handled,
+                _ => (),
             }
         }
-        false
+
+        ActionHandled::NotHandled
     }
 }
 
@@ -216,9 +217,9 @@ fn main() -> Result<(), io::Error> {
         // Handle game actions here (Timers).
         while !app.event_queue.is_empty() {
             let next_action = app.event_queue.get_next_action().unwrap();
-            let handled = app.try_handle_room_action(&next_action);
-            if handled {
-                break;
+            match app.try_handle_room_action(&next_action) {
+                ActionHandled::Handled => break,
+                _ => (),
             }
 
             // Handle system and global actions here.
@@ -246,11 +247,10 @@ fn main() -> Result<(), io::Error> {
                 }
                 Action::PlayerDied => {
                     app.event_queue.schedule_action(Action::Message(
-                            String::from("You died."),
-                            GameEventType::Failure,
-                            ));
+                        String::from("You died."),
+                        GameEventType::Failure,
+                    ));
                 }
-
 
                 Action::Tick(dt) => {
                     app.event_queue.tick(dt);
