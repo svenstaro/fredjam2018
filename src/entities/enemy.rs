@@ -12,7 +12,7 @@ use crate::{Action, GameEventType};
 #[derive(Debug, Copy, Clone)]
 pub enum EnemyType {
     Rat,
-    Roomba
+    Roomba,
 }
 
 pub trait Enemy: Debug {
@@ -56,7 +56,7 @@ impl GenericEnemy {
             attack_strength,
             timer_length,
             attack_messages,
-            enemy_attack_messages
+            enemy_attack_messages,
         }
     }
 }
@@ -87,10 +87,7 @@ impl Enemy for GenericEnemy {
         if let Some(message) = rand::thread_rng().choose(&self.attack_messages) {
             message.to_string()
         } else {
-            String::from(format!(
-                "You attack the {:?}.",
-                self.enemy_type
-            ))
+            String::from(format!("You attack the {:?}.", self.enemy_type))
         }
     }
 
@@ -98,10 +95,7 @@ impl Enemy for GenericEnemy {
         if let Some(message) = rand::thread_rng().choose(&self.enemy_attack_messages) {
             message.to_string()
         } else {
-            String::from(format!(
-                "The {:?} attacks!",
-                self.enemy_type
-            ))
+            String::from(format!("The {:?} attacks!", self.enemy_type))
         }
     }
 
@@ -122,10 +116,7 @@ impl Enemy for GenericEnemy {
             ),
             Timer::new(
                 TimerType::EnemyAttack,
-                &format!(
-                    "The {:?} is preparing to attack you.",
-                    self.enemy_type
-                ),
+                &format!("The {:?} is preparing to attack you.", self.enemy_type),
                 0,
                 self.timer_length,
                 Action::EnemyAttack,
@@ -139,13 +130,26 @@ pub fn initialize_enemies(state: &mut State) {
     let rat_attack_messages = vec!["The rat gnaws on your leg.".into()];
     let rat_enemy_attack_messages = vec![];
 
-    let rat = GenericEnemy::new(EnemyType::Rat, 5, 1, 5 * 1000, rat_attack_messages, rat_enemy_attack_messages);
+    let rat = GenericEnemy::new(
+        EnemyType::Rat,
+        5,
+        1,
+        5 * 1000,
+        rat_attack_messages,
+        rat_enemy_attack_messages,
+    );
     state.enemies.insert(RoomType::Cryocontrol, Box::new(rat));
-
 
     let roomba_attack_messages = vec!["".into()];
     let roomba_enemy_attack_messages = vec![];
 
-    let roomba = GenericEnemy::new(EnemyType::Roomba, 5, 1, 5 * 1000, roomba_attack_messages, roomba_enemy_attack_messages);
+    let roomba = GenericEnemy::new(
+        EnemyType::Roomba,
+        5,
+        1,
+        5 * 1000,
+        roomba_attack_messages,
+        roomba_enemy_attack_messages,
+    );
     state.enemies.insert(RoomType::Corridor, Box::new(roomba));
 }
