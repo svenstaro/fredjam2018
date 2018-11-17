@@ -28,7 +28,7 @@ use crate::state::State;
 use crate::game_event::{GameEvent, GameEventType};
 use crate::event_queue::EventQueue;
 use crate::event::{Event, Events};
-use crate::rooms::{LockedRoom, Room, RoomType, WakeUpRoom};
+use crate::rooms::{LockedRoom, Room, RoomType, CryobayRoom};
 use crate::utils::BoxShape;
 
 #[derive(Debug)]
@@ -83,11 +83,11 @@ fn main() -> Result<(), io::Error> {
     let mut app = App::new(state);
 
     app.rooms
-        .insert(RoomType::WakeUp, Box::new(WakeUpRoom { lever: false }));
+        .insert(RoomType::Cryobay, Box::new(CryobayRoom { lever: false }));
     app.rooms.insert(RoomType::Locked, Box::new(LockedRoom {}));
 
     app.event_queue
-        .schedule_action(Action::Enter(RoomType::WakeUp));
+        .schedule_action(Action::Enter(RoomType::Cryobay));
 
     loop {
         let size = terminal.size()?;

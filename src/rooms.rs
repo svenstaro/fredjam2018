@@ -13,17 +13,17 @@ pub trait Room: Debug {
 
 #[derive(Debug, PartialEq, Eq, Hash)]
 pub enum RoomType {
-    WakeUp,
+    Cryobay,
     Locked,
 }
 
 // Initial room.
 #[derive(Debug)]
-pub struct WakeUpRoom {
+pub struct CryobayRoom {
     pub lever: bool,
 }
 
-impl Room for WakeUpRoom {
+impl Room for CryobayRoom {
     fn handle_action(
         &mut self,
         state: &mut State,
@@ -32,9 +32,9 @@ impl Room for WakeUpRoom {
     ) -> bool {
         match action {
             Action::Enter(room) => match room {
-                RoomType::WakeUp => {
+                RoomType::Cryobay => {
                     event_queue.schedule_action(Action::Message(
-                        String::from("Welcome to W.O.R.L.D."),
+                        String::from(include_str!("../assets/rooms/cryobay_enter.txt")),
                         GameEventType::Success,
                     ));
                     true
@@ -44,7 +44,7 @@ impl Room for WakeUpRoom {
             Action::Command(command) => {
                 // TODO Maybe there's a better approach to finding the current room...
                 match state.current_room {
-                    RoomType::WakeUp => {
+                    RoomType::Cryobay => {
                         // TODO replace command by proper enum.
                         if command == &"use lever" {
                             if !self.lever {
@@ -74,7 +74,7 @@ impl Room for WakeUpRoom {
                                     String::from("You open the door and pass through."),
                                     GameEventType::Success,
                                 ));
-                                event_queue.schedule_action(Action::Leave(RoomType::WakeUp));
+                                event_queue.schedule_action(Action::Leave(RoomType::Cryobay));
                                 event_queue.schedule_action(Action::Enter(RoomType::Locked));
                                 true
                             } else {
