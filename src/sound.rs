@@ -4,11 +4,11 @@ use rodio::Decoder;
 use rodio::Sample;
 use rodio::Source;
 use rodio::{self, Sink};
+use std::collections::HashMap;
 use std::io::Cursor;
 use std::sync::mpsc::Receiver;
 use std::sync::{Arc, Mutex};
 use std::time::Duration;
-use std::collections::HashMap;
 use strum::IntoEnumIterator;
 
 #[derive(Clone, Copy, PartialEq, Eq, Debug)]
@@ -30,7 +30,7 @@ pub enum Track {
 struct MusicPlayback {
     track: Arc<Mutex<Track>>,
     inner_source: Box<Source<Item = i16> + Send>,
-    data_cursors: HashMap<Track, Decoder<Cursor<&'static [u8]>>>
+    data_cursors: HashMap<Track, Decoder<Cursor<&'static [u8]>>>,
 }
 
 struct MusicPlaybackController {
@@ -52,19 +52,17 @@ impl MusicPlayback {
         for track in Track::iter() {
             cursors.insert(
                 track,
-                rodio::Decoder::new(
-                    AudioEvent::Track(track).data_cursor()
-                ).unwrap()
+                rodio::Decoder::new(AudioEvent::Track(track).data_cursor()).unwrap(),
             );
         }
-        (MusicPlayback {
-            track: track.clone(),
-            inner_source: Box::new(Zero::new(2, 44800)),
-            data_cursors: cursors,
-        },
-        MusicPlaybackController{
-            track: track
-        })
+        (
+            MusicPlayback {
+                track: track.clone(),
+                inner_source: Box::new(Zero::new(2, 44800)),
+                data_cursors: cursors,
+            },
+            MusicPlaybackController { track: track },
+        )
     }
 }
 

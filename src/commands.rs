@@ -22,10 +22,16 @@ pub fn try_handle_command(tokens: String, state: &State) -> Vec<Action> {
                             GameEventType::Failure,
                         )]
                     }
-                },
-                None => vec![Action::Message(String::from("There is no room named \"") + &room_name + "\".", GameEventType::Failure)]
+                }
+                None => vec![Action::Message(
+                    String::from("There is no room named \"") + &room_name + "\".",
+                    GameEventType::Failure,
+                )],
             }
-        },
-        _ => vec![Action::Message(String::from("Use one of the following commands: enter."), GameEventType::Failure)]
+        }
+        _ => vec![Action::Message(
+            String::from("Use one of the following commands: enter."),
+            GameEventType::Failure,
+        )],
     }
 }
