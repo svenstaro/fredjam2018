@@ -31,16 +31,6 @@ impl Room for CryobayRoom {
         action: &Action,
     ) -> bool {
         match action {
-            Action::Enter(room) => match room {
-                RoomType::Cryobay => {
-                    event_queue.schedule_action(Action::Message(
-                        String::from(room_intro_text(RoomType::Cryobay)),
-                        GameEventType::Normal,
-                    ));
-                    true
-                }
-                _ => false,
-            },
             Action::Command(command) => {
                 // TODO Maybe there's a better approach to finding the current room...
                 match state.current_room {
@@ -107,30 +97,18 @@ impl Room for SlushLobbyRoom {
         event_queue: &mut EventQueue,
         action: &Action,
     ) -> bool {
-        match action {
-            Action::Enter(room) => match room {
-                RoomType::SlushLobby => {
-                    event_queue.schedule_action(Action::Message(
-                        String::from(room_intro_text(RoomType::SlushLobby)),
-                        GameEventType::Normal,
-                    ));
-                    true
-                }
-                _ => false,
-            },
-            _ => false,
-        }
+        false
     }
 }
 
-fn room_game_name(room_type: RoomType) -> &'static str {
+pub fn room_game_name(room_type: RoomType) -> &'static str {
     match room_type {
         RoomType::Cryobay => "cryobay",
         RoomType::SlushLobby => "slush lobby",
     }
 }
 
-fn room_intro_text(room_type: RoomType) -> &'static str {
+pub fn room_intro_text(room_type: RoomType) -> &'static str {
     match room_type {
         RoomType::Cryobay => include_str!("../assets/rooms/cryobay_enter.txt"),
         RoomType::SlushLobby => include_str!("../assets/rooms/slush_lobby_enter.txt"),

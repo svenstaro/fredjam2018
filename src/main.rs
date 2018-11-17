@@ -27,7 +27,7 @@ mod utils;
 
 use crate::action::Action;
 use crate::event::{Event, Events};
-use crate::rooms::{SlushLobbyRoom, Room, RoomType, CryobayRoom};
+use crate::rooms::{SlushLobbyRoom, Room, RoomType, CryobayRoom, room_intro_text};
 use crate::event_queue::EventQueue;
 use crate::game_event::{GameEvent, GameEventType};
 use crate::state::State;
@@ -218,6 +218,12 @@ fn main() -> Result<(), io::Error> {
                         content: message,
                         game_event_type,
                     })
+                }
+                Action::Enter(room) => {
+                    app.event_queue.schedule_action(Action::Message(
+                        String::from(room_intro_text(room)),
+                        GameEventType::Normal,
+                    ));
                 }
                 Action::Tick(dt) => {
                     app.event_queue.tick(dt);
