@@ -183,7 +183,10 @@ fn main() -> Result<(), io::Error> {
                             width: 20,
                             height: 20,
                         },
-                        color: Color::White,
+                        color: match app.state.current_room {
+                            RoomType::Cryobay => Color::Red,
+                            _ => Color::White,
+                        },
                     });
                     ctx.draw(&BoxShape {
                         rect: Rect {
@@ -192,7 +195,10 @@ fn main() -> Result<(), io::Error> {
                             width: 20,
                             height: 20,
                         },
-                        color: Color::White,
+                        color: match app.state.current_room {
+                            RoomType::SlushLobby => Color::Red,
+                            _ => Color::White,
+                        },
                     });
                 })
                 .x_bounds([0.0, 100.0])
@@ -280,6 +286,22 @@ fn main() -> Result<(), io::Error> {
                         GameEventType::Normal,
                     ));
                 }
+                Action::EnemyAttack => {
+                    if let Some(ref enemy) = app.state.enemy {
+                        app.state.player.health -= enemy.get_attack_strength();
+                        if app.state.player.health <= 0 {
+                            app.event_queue.schedule_action(Action::PlayerDied);
+                        }
+                    }
+                }
+                Action::PlayerDied => {
+                    app.event_queue.schedule_action(Action::Message(
+                            String::from("You died."),
+                            GameEventType::Failure,
+                            ));
+                }
+
+
                 Action::Tick(dt) => {
                     app.event_queue.tick(dt);
                 }

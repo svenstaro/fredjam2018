@@ -11,6 +11,12 @@ pub enum Action {
     Leave(RoomType),
     Message(String, GameEventType),
     Command(String),
+
+    // Player
     Attack(String),
     Dodge(String),
+    PlayerDied,
+
+    // Enemy attack
+    EnemyAttack,
 }
