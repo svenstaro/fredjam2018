@@ -1,7 +1,7 @@
 use crate::EventQueue;
 use crate::{Action, GameEventType, State};
 
-pub trait Room {
+pub trait Room: Debug {
     fn handle_action(
         &mut self,
         state: &mut State,
@@ -17,6 +17,7 @@ pub enum RoomType {
 }
 
 // Initial room.
+#[derive(Debug)]
 pub struct WakeUpRoom {
     pub lever: bool,
 }
@@ -95,6 +96,7 @@ impl Room for WakeUpRoom {
 }
 
 // Second room room, locked per default, lever needs to be pulled.
+#[derive(Debug)]
 pub struct LockedRoom;
 
 impl Room for LockedRoom {
