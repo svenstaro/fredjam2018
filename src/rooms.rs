@@ -3,7 +3,7 @@ use std::fmt::Debug;
 use crate::enemy::Enemy;
 use crate::enemy::{EnemyType, GenericEnemy};
 use crate::EventQueue;
-use crate::{Action, ActionHandled, GameEventType, State};
+use crate::{Action, ActionHandled, State};
 
 pub trait Room: Debug {
     fn handle_action(
@@ -19,9 +19,9 @@ pub enum RoomType {
     Cryobay,
     SlushLobby,
     Cryocontrol,
+    Corridor,
 }
 
-// Initial room.
 #[derive(Debug)]
 pub struct CryobayRoom {
     pub lever: bool,
@@ -33,6 +33,26 @@ impl CryobayRoom {
     }
 }
 
+#[derive(Debug)]
+pub struct CorridorRoom {}
+
+impl CorridorRoom {
+    pub fn new() -> CorridorRoom {
+        CorridorRoom {}
+    }
+}
+
+impl Room for CorridorRoom {
+    fn handle_action(
+        &mut self,
+        state: &mut State,
+        event_queue: &mut EventQueue,
+        action: &Action,
+    ) -> ActionHandled {
+        ActionHandled::NotHandled
+    }
+}
+
 impl Room for CryobayRoom {
     fn handle_action(
         &mut self,
@@ -40,20 +60,7 @@ impl Room for CryobayRoom {
         event_queue: &mut EventQueue,
         action: &Action,
     ) -> ActionHandled {
-        match action {
-            Action::Enter(room_type) => match room_type {
-                RoomType::Cryobay => {
-                    let rat = GenericEnemy::new(EnemyType::Rat, 5, 1, 60 * 1000);
-                    let timer = rat.get_attack_timer();
-                    event_queue.schedule_timer(timer);
-                    state.enemy = Some(Box::new(rat));
-
-                    ActionHandled::NotHandled
-                }
-                _ => ActionHandled::NotHandled,
-            },
-            _ => ActionHandled::NotHandled,
-        }
+        ActionHandled::NotHandled
     }
 }
 
@@ -74,20 +81,7 @@ impl Room for SlushLobbyRoom {
         event_queue: &mut EventQueue,
         action: &Action,
     ) -> ActionHandled {
-        match action {
-            Action::Enter(room_type) => match room_type {
-                RoomType::SlushLobby => {
-                    let rat = GenericEnemy::new(EnemyType::Rat, 5, 1, 60 * 1000);
-                    let timer = rat.get_attack_timer();
-                    event_queue.schedule_timer(timer);
-                    state.enemy = Some(Box::new(rat));
-
-                    ActionHandled::NotHandled
-                }
-                _ => ActionHandled::NotHandled,
-            },
-            _ => return ActionHandled::NotHandled,
-        }
+        ActionHandled::NotHandled
     }
 }
 
@@ -96,6 +90,7 @@ pub fn room_game_name(room_type: RoomType) -> &'static str {
         RoomType::Cryobay => "cryobay",
         RoomType::SlushLobby => "slush lobby",
         RoomType::Cryocontrol => "cryocontrol",
+        RoomType::Corridor => "corridor",
     }
 }
 
@@ -104,6 +99,7 @@ pub fn room_intro_text(room_type: RoomType) -> &'static str {
         RoomType::Cryobay => include_str!("../assets/rooms/cryobay_enter.txt"),
         RoomType::SlushLobby => include_str!("../assets/rooms/slush_lobby_enter.txt"),
         RoomType::Cryocontrol => include_str!("../assets/rooms/cryocontrol_enter.txt"),
+        RoomType::Corridor => include_str!("../assets/rooms/corridor_enter.txt"),
     }
 }
 
@@ -111,7 +107,8 @@ pub fn adjacent_rooms(room_type: RoomType) -> Vec<RoomType> {
     match room_type {
         RoomType::Cryobay => vec![RoomType::SlushLobby],
         RoomType::SlushLobby => vec![RoomType::Cryobay, RoomType::Cryocontrol],
-        RoomType::Cryocontrol => vec![RoomType::SlushLobby]
+        RoomType::Cryocontrol => vec![RoomType::SlushLobby],
+        RoomType::Corridor => vec![RoomType::Cryocontrol],
     }
 }
 
@@ -120,6 +117,7 @@ pub fn room_type_from_name(room_name: &str) -> Option<RoomType> {
         "cryobay" => Some(RoomType::Cryobay),
         "slush lobby" => Some(RoomType::SlushLobby),
         "cryocontrol" => Some(RoomType::Cryocontrol),
-        _ => None
+        "corridor" => Some(RoomType::Corridor),
+        _ => None,
     }
 }
