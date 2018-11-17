@@ -230,8 +230,10 @@ fn main() -> Result<(), io::Error> {
         write!(
             terminal.backend_mut(),
             "{}",
-            Goto(4 + app.input.width() as u16, 3)
+            Goto(3 + app.input.width() as u16, 3)
         )?;
+
+        terminal.backend_mut().flush()?;
 
         // Handle system events.
         match events.next().unwrap() {
