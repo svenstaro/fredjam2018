@@ -27,9 +27,9 @@ mod utils;
 
 use crate::action::Action;
 use crate::event::{Event, Events};
-use crate::rooms::{SlushLobbyRoom, Room, RoomType, CryobayRoom, room_intro_text};
 use crate::event_queue::EventQueue;
 use crate::game_event::{GameEvent, GameEventType};
+use crate::rooms::{room_intro_text, CryobayRoom, Room, RoomType, SlushLobbyRoom};
 use crate::state::State;
 use crate::utils::{duration_to_msec_u64, BoxShape};
 
@@ -86,7 +86,8 @@ fn main() -> Result<(), io::Error> {
 
     app.rooms
         .insert(RoomType::Cryobay, Box::new(CryobayRoom { lever: false }));
-    app.rooms.insert(RoomType::SlushLobby, Box::new(SlushLobbyRoom {}));
+    app.rooms
+        .insert(RoomType::SlushLobby, Box::new(SlushLobbyRoom {}));
 
     app.event_queue
         .schedule_action(Action::Enter(RoomType::Cryobay));
