@@ -51,7 +51,7 @@ impl MusicPlayback {
         for track in Track::iter() {
             cursors.insert(
                 track,
-                rodio::Decoder::new(AudioEvent::Track(track).data_cursor()).unwrap().repeat_infinite(),
+                rodio::Decoder::new(AudioEvent::Track(track).data_cursor()).unwrap(),
             );
         }
         (
