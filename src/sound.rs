@@ -83,7 +83,7 @@ impl AudioEvent {
                 Effect::BeepLong => &include_bytes!("../assets/wav/beep_long.wav")[..],
             },
             AudioEvent::Track(track) => match track {
-                Track::Intro => &include_bytes!("../assets/mp3/intro-eq3.mp3")[..],
+                Track::Intro => &include_bytes!("../assets/music/intro.mp3")[..],
             },
         }
     }

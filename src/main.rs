@@ -1,4 +1,4 @@
-use self::sound::{AudioEvent, Effect};
+use self::sound::{AudioEvent, Effect, Track};
 use std::collections::HashMap;
 use std::io::{self, Write};
 use std::sync::mpsc::channel;
