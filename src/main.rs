@@ -1,4 +1,4 @@
-use self::sound::{AudioEvent, Effect};
+use self::sound::{AudioEvent, Effect, Track};
 use std::collections::HashMap;
 use std::io::{self, Write};
 use std::sync::mpsc::channel;
@@ -180,6 +180,7 @@ fn main() -> Result<(), io::Error> {
                 Key::Char('\n') => {
                     let mut content: String = app.input.drain(..).collect();
                     let command = Action::Command(content.clone());
+                    snd_send.send(AudioEvent::Track(Track::Intro));
                     content.push('\n');
                     app.log.push(GameEvent {
                         content,
