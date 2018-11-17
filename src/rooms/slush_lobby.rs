@@ -5,11 +5,13 @@ use crate::{Action, ActionHandled, State};
 
 // Second room room, locked per default, lever needs to be pulled.
 #[derive(Debug)]
-pub struct SlushLobbyRoom;
+pub struct SlushLobbyRoom {
+    pub visited: bool,
+}
 
 impl SlushLobbyRoom {
     pub fn new() -> SlushLobbyRoom {
-        SlushLobbyRoom {}
+        SlushLobbyRoom { visited: false }
     }
 }
 
@@ -23,5 +25,9 @@ impl Room for SlushLobbyRoom {
         match action {
             _ => return ActionHandled::NotHandled,
         }
+    }
+
+    fn visit(&mut self) {
+        self.visited = true;
     }
 }

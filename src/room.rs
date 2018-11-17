@@ -12,6 +12,8 @@ pub trait Room: Debug {
         event_queue: &mut EventQueue,
         action: &Action,
     ) -> ActionHandled;
+
+    fn visit(&mut self);
 }
 
 #[derive(Debug, PartialEq, Eq, Hash, Clone, Copy)]
