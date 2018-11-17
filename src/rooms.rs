@@ -25,7 +25,7 @@ pub struct CryobayRoom {
 
 impl CryobayRoom {
     pub fn new() -> CryobayRoom {
-        CryobayRoom {lever: false}
+        CryobayRoom { lever: false }
     }
 }
 
