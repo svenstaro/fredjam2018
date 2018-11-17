@@ -31,11 +31,51 @@ pub struct GameEvent {
     pub game_event_type: GameEventType,
 }
 
-#[derive(Debug, Default)]
+
+#[derive(Debug)]
+pub enum Action {
+
+}
+
+// Initial room.
+pub struct WakeUp {}
+
+pub trait Room {
+    fn on_enter(self) -> bool;
+    fn on_leave(self) -> bool;
+    fn on_tick(self, dt: u32);
+    fn handle_action(self, action: Action) -> bool;
+}
+
+// #[derive(Debug)]
+#[derive(Default)]
+pub struct State {
+    pub rooms: Vec<Box<Room>>,
+}
+
+impl State {
+    pub fn schedule_action(&mut self, action: &Action) {
+        // Append action to timers.
+    }
+
+    pub fn tick(&mut self, dt: u32) {
+        // Tick each room.
+    }
+
+    // Return value indicates redraw required.
+    pub fn handle_action(&mut self, action: &Action) -> bool {
+        // Try handling the action in a room, if that succeeds, then break, else try handling
+        // globally.
+        true
+    }
+}
+
+#[derive(Default)]
 pub struct App {
     pub size: Rect,
     pub log: Vec<GameEvent>,
     pub input: String,
+    pub state: State,
 }
 
 fn main() -> Result<(), io::Error> {
@@ -98,6 +138,7 @@ fn main() -> Result<(), io::Error> {
             Goto(4 + app.input.width() as u16, 3)
         )?;
 
+        // Handle system events.
         match events.next().unwrap() {
             Event::Input(input) => match input {
                 Key::Char('q') => {
@@ -116,8 +157,11 @@ fn main() -> Result<(), io::Error> {
             }
             event::Event::Tick => {
                 app.log.push(GameEvent { content: "text ".to_string(), game_event_type: GameEventType::Combat });
+                app.state.tick(0); // TODO dt how?
             }
         }
+
+        // Handle game actions here (Timers).
     }
     Ok(())
 }
