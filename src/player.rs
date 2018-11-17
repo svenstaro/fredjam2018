@@ -6,5 +6,6 @@ pub enum Item {
 #[derive(Debug)]
 pub struct Player {
     pub health: i32,
+    pub attack_strength: i32,
     pub items: Vec<Item>,
 }

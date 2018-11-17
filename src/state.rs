@@ -16,6 +16,7 @@ impl State {
             current_room: RoomType::Cryobay,
             player: Player {
                 health: 100,
+                attack_strength: 5,
                 items: vec![],
             },
             enemy: None,

@@ -1,6 +1,9 @@
-use crate::EventQueue;
-use crate::{Action, GameEventType, State};
 use std::fmt::Debug;
+
+use crate::enemy::Enemy;
+use crate::enemy::{EnemyType, GenericEnemy};
+use crate::EventQueue;
+use crate::{Action, ActionHandled, GameEventType, State};
 
 pub trait Room: Debug {
     fn handle_action(
@@ -8,7 +11,7 @@ pub trait Room: Debug {
         state: &mut State,
         event_queue: &mut EventQueue,
         action: &Action,
-    ) -> bool;
+    ) -> ActionHandled;
 }
 
 #[derive(Debug, PartialEq, Eq, Hash, Clone, Copy)]
@@ -26,7 +29,7 @@ pub struct CryobayRoom {
 
 impl CryobayRoom {
     pub fn new() -> CryobayRoom {
-        CryobayRoom {lever: false}
+        CryobayRoom { lever: false }
     }
 }
 
@@ -36,8 +39,19 @@ impl Room for CryobayRoom {
         state: &mut State,
         event_queue: &mut EventQueue,
         action: &Action,
-    ) -> bool {
+    ) -> ActionHandled {
         match action {
+            Action::Enter(room_type) => match room_type {
+                RoomType::Cryobay => {
+                    let rat = GenericEnemy::new(EnemyType::Rat, 5, 1, 60 * 1000);
+                    let timer = rat.get_attack_timer();
+                    event_queue.schedule_timer(timer);
+                    state.enemy = Some(Box::new(rat));
+
+                    ActionHandled::NotHandled
+                }
+                _ => ActionHandled::NotHandled,
+            },
             Action::Command(command) => {
                 // TODO Maybe there's a better approach to finding the current room...
                 match state.current_room {
@@ -58,13 +72,13 @@ impl Room for CryobayRoom {
                                     GameEventType::Failure,
                                 ));
                             }
-                            true
+                            ActionHandled::Handled
                         } else if command == &"look around" {
                             event_queue.schedule_action(Action::Message(
                                     String::from("The room is empty, there is just some lever and a solid door with no handle."),
                                     GameEventType::Normal,
                                     ));
-                            true
+                            ActionHandled::Handled
                         } else if command == &"use door" {
                             if self.lever {
                                 event_queue.schedule_action(Action::Message(
@@ -73,22 +87,22 @@ impl Room for CryobayRoom {
                                 ));
                                 event_queue.schedule_action(Action::Leave(RoomType::Cryobay));
                                 event_queue.schedule_action(Action::Enter(RoomType::SlushLobby));
-                                true
+                                ActionHandled::Handled
                             } else {
                                 event_queue.schedule_action(Action::Message(
                                         String::from("No matter how hard you push the door, it does not even move an inch."),
                                         GameEventType::Failure,
                                         ));
-                                true
+                                ActionHandled::Handled
                             }
                         } else {
-                            false
+                            ActionHandled::NotHandled
                         }
                     }
-                    _ => false,
+                    _ => ActionHandled::NotHandled,
                 }
             }
-            _ => false,
+            _ => ActionHandled::NotHandled,
         }
     }
 }
@@ -109,8 +123,21 @@ impl Room for SlushLobbyRoom {
         state: &mut State,
         event_queue: &mut EventQueue,
         action: &Action,
-    ) -> bool {
-        false
+    ) -> ActionHandled {
+        match action {
+            Action::Enter(room_type) => match room_type {
+                RoomType::SlushLobby => {
+                    let rat = GenericEnemy::new(EnemyType::Rat, 5, 1, 60 * 1000);
+                    let timer = rat.get_attack_timer();
+                    event_queue.schedule_timer(timer);
+                    state.enemy = Some(Box::new(rat));
+
+                    ActionHandled::NotHandled
+                }
+                _ => ActionHandled::NotHandled,
+            },
+            _ => return ActionHandled::NotHandled,
+        }
     }
 }
 
