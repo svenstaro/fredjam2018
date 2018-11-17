@@ -24,7 +24,9 @@ pub trait Enemy: Debug {
 
     fn get_attack_strength(&self) -> i32;
 
-    fn get_attack_timers(&self) -> Vec<Timer>;
+    fn get_initial_attack_timers(&self, delay: u64) -> Vec<Timer>;
+
+    fn get_attack_timer(&self, delay: u64) -> Timer;
 
     fn get_attack_message(&self) -> String;
 
@@ -99,14 +101,14 @@ impl Enemy for GenericEnemy {
         }
     }
 
-    fn get_attack_timers(&self) -> Vec<Timer> {
+    fn get_initial_attack_timers(&self, delay: u64) -> Vec<Timer> {
         vec![
             Timer::new(
                 TimerType::EnemyAttack,
                 // Unused, because invisible.
                 &format!("{:?} attack notification timer", self.enemy_type),
                 0,
-                self.timer_length - self.timer_length / 10,
+                delay,
                 Action::Message(
                     String::from(format!("The {:?}'s attack is imminent.", self.enemy_type)),
                     GameEventType::Combat,
@@ -114,15 +116,20 @@ impl Enemy for GenericEnemy {
                 // Should not be visible as a progressbar.
                 false,
             ),
-            Timer::new(
-                TimerType::EnemyAttack,
-                &format!("The {:?} is preparing to attack you.", self.enemy_type),
-                0,
-                self.timer_length,
-                Action::EnemyAttack,
-                true,
-            ),
+            self.get_attack_timer(delay),
         ]
+    }
+
+    fn get_attack_timer(&self, delay: u64) -> Timer {
+        let show_bar = (delay <= 0);
+        Timer::new(
+            TimerType::EnemyAttack,
+            &format!("The {:?} is preparing to attack you.", self.enemy_type),
+            0,
+            self.timer_length + delay,
+            Action::EnemyAttack,
+            show_bar,
+        )
     }
 }
 

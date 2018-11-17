@@ -31,7 +31,7 @@ impl Room for SlushLobbyRoom {
         self.visited = true;
     }
 
-    fn is_visited(&self) -> bool{
+    fn is_visited(&self) -> bool {
         self.visited
     }
 }

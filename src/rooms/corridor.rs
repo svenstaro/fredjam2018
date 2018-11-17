@@ -28,7 +28,7 @@ impl Room for CorridorRoom {
         self.visited = true;
     }
 
-    fn is_visited(&self) -> bool{
+    fn is_visited(&self) -> bool {
         self.visited
     }
 }

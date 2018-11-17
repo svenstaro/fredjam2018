@@ -261,8 +261,8 @@ fn main() -> Result<(), io::Error> {
                 Key::Char('\n') => {
                     if !app.input.is_empty() {
                         let mut content: String = app.input.drain(..).collect();
-                        content = format!(">>> {}", content);
                         let command = Action::Command(content.clone());
+                        content = format!(">>> {}", content);
                         snd_send.send(AudioEvent::Track(Track::Intro));
                         content.push_str("\n\n");
                         app.log.push_front(GameEvent {
@@ -310,25 +310,21 @@ fn main() -> Result<(), io::Error> {
                 Action::Leave(_) => {}
                 Action::Command(tokens) => app.try_handle_command(tokens),
                 Action::EnemyAttack => {
-                    let enemy_option = app.state.get_current_enemy(app.state.current_room);
-                    let enemy_match = match enemy_option {
-                        Some(ref enemy) => {
-                            let timers = enemy.get_attack_timers();
-                            app.event_queue.schedule_timers(timers);
-                            Some((enemy.get_enemy_type(), enemy.get_attack_strength()))
-                        }
-                        None => None,
-                    };
+                    if let Some(ref enemy) = app.state.get_current_enemy(app.state.current_room) {
+                        let timer = enemy.get_attack_timer(0);
+                        app.event_queue.schedule_timer(timer);
 
-                    if let Some((enemy_type, attack_strength)) = enemy_match {
-                        app.state.player.health -= attack_strength;
                         app.log.push_front(GameEvent {
                             content: format!(
                                 "{:?} attacks you! You lose {} HP, you now have {} HP\n",
-                                enemy_type, attack_strength, app.state.player.health,
+                                enemy.get_enemy_type(),
+                                enemy.get_attack_strength(),
+                                app.state.player.health,
                             ),
                             game_event_type: GameEventType::Combat,
                         });
+
+                        app.state.player.health -= enemy.get_attack_strength();
                         if app.state.player.health <= 0 {
                             app.event_queue.schedule_action(Action::PlayerDied);
                         }
