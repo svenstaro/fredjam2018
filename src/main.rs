@@ -85,8 +85,8 @@ fn main() -> Result<(), io::Error> {
     let mut app = App::new(state);
 
     app.rooms
-        .insert(RoomType::Cryobay, Box::new(CryobayRoom { lever: false }));
-    app.rooms.insert(RoomType::SlushLobby, Box::new(SlushLobbyRoom {}));
+        .insert(RoomType::Cryobay, Box::new(CryobayRoom::new()));
+    app.rooms.insert(RoomType::SlushLobby, Box::new(SlushLobbyRoom::new()));
 
     app.event_queue
         .schedule_action(Action::Enter(RoomType::Cryobay));
