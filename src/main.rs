@@ -1,6 +1,5 @@
 use self::sound::{AudioEvent, Effect, Track};
-extern crate enum_derive;
-use std::collections::HashMap;
+use std::collections::{HashMap, VecDeque};
 use std::io::{self, Write};
 use std::sync::mpsc::channel;
 use std::thread;
@@ -41,7 +40,7 @@ pub struct App {
     // The size of the console window.
     pub size: Rect,
     // The system event, like rendering stuff in the console.
-    pub log: Vec<GameEvent>,
+    pub log: VecDeque<GameEvent>,
     // The input in the command box.
     pub input: String,
     // The global game state.
@@ -110,6 +109,7 @@ fn main() -> Result<(), io::Error> {
             app.size = size;
         }
 
+        // Draw.
         terminal.draw(|mut f| {
             let h_chunks = Layout::default()
                 // Split along the horizontal axis.
@@ -201,7 +201,7 @@ fn main() -> Result<(), io::Error> {
                     let command = Action::Command(content.clone());
                     snd_send.send(AudioEvent::Track(Track::Intro));
                     content.push('\n');
-                    app.log.push(GameEvent {
+                    app.log.push_front(GameEvent {
                         content,
                         game_event_type: GameEventType::Normal,
                     });
@@ -234,7 +234,7 @@ fn main() -> Result<(), io::Error> {
             match next_action {
                 Action::Message(mut message, game_event_type) => {
                     message.push('\n');
-                    app.log.push(GameEvent {
+                    app.log.push_front(GameEvent {
                         content: message,
                         game_event_type,
                     })
@@ -248,7 +248,7 @@ fn main() -> Result<(), io::Error> {
                 Action::Tick(dt) => {
                     app.event_queue.tick(dt);
                 }
-                _ => app.log.push(GameEvent {
+                _ => app.log.push_front(GameEvent {
                     content: String::from("Unhandled action!\n"),
                     game_event_type: GameEventType::Debug,
                 }),

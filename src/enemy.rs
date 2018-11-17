@@ -4,19 +4,19 @@ use std::fmt::Debug;
 use crate::timer::Timer;
 use crate::{Action, GameEventType};
 
-#[derive(Debug)]
+#[derive(Debug, Copy, Clone)]
 pub enum EnemyType {
     Rat,
 }
 
 pub trait Enemy: Debug {
-    fn get_enemy_type(self) -> EnemyType;
+    fn get_enemy_type(&self) -> EnemyType;
 
-    fn get_health(self) -> i32;
+    fn get_health(&self) -> i32;
 
     fn reduce_health(&mut self, amount: i32) -> bool;
 
-    fn get_attack_timer(self) -> Timer;
+    fn get_attack_timer(&self) -> Timer;
 }
 
 #[derive(Debug)]
@@ -27,12 +27,27 @@ pub struct GenericEnemy {
     timer_length: u64,
 }
 
+impl GenericEnemy {
+    pub fn new(enemy_type: EnemyType,
+               health: i32,
+               attack_strength: i32,
+               timer_length: u64,
+               ) -> Self {
+        GenericEnemy {
+            enemy_type,
+            health,
+            attack_strength,
+            timer_length,
+        }
+    }
+}
+
 impl Enemy for GenericEnemy {
-    fn get_enemy_type(self) -> EnemyType {
+    fn get_enemy_type(&self) -> EnemyType {
         self.enemy_type
     }
 
-    fn get_health(self) -> i32 {
+    fn get_health(&self) -> i32 {
         self.health
     }
 
@@ -45,7 +60,7 @@ impl Enemy for GenericEnemy {
         false
     }
 
-    fn get_attack_timer(self) -> Timer {
+    fn get_attack_timer(&self) -> Timer {
         let mut timings = HashMap::new();
         timings.insert(
             10,
