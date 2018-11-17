@@ -236,6 +236,22 @@ fn main() -> Result<(), io::Error> {
                         GameEventType::Normal,
                     ));
                 }
+                Action::EnemyAttack => {
+                    if let Some(ref enemy) = app.state.enemy {
+                        app.state.player.health -= enemy.get_attack_strength();
+                        if app.state.player.health <= 0 {
+                            app.event_queue.schedule_action(Action::PlayerDied);
+                        }
+                    }
+                }
+                Action::PlayerDied => {
+                    app.event_queue.schedule_action(Action::Message(
+                            String::from("You died."),
+                            GameEventType::Failure,
+                            ));
+                }
+
+
                 Action::Tick(dt) => {
                     app.event_queue.tick(dt);
                 }

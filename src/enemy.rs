@@ -16,6 +16,8 @@ pub trait Enemy: Debug {
 
     fn reduce_health(&mut self, amount: i32) -> bool;
 
+    fn get_attack_strength(&self) -> i32;
+
     fn get_attack_timer(&self) -> Timer;
 }
 
@@ -58,6 +60,10 @@ impl Enemy for GenericEnemy {
         }
 
         false
+    }
+
+    fn get_attack_strength(&self) -> i32 {
+        self.attack_strength
     }
 
     fn get_attack_timer(&self) -> Timer {
