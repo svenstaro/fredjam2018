@@ -8,6 +8,7 @@ use tui::style::{Color, Modifier, Style};
 use tui::widgets::{Block, Borders, List, Paragraph, Text, Widget};
 use tui::Terminal;
 use unicode_width::UnicodeWidthStr;
+use std::collections::VecDeque;
 
 mod event;
 
@@ -34,10 +35,10 @@ pub enum Action {
 }
 
 pub trait Room {
-    fn on_enter(self, state: &mut State) -> bool;
-    fn on_leave(self, state: &mut State) -> bool;
-    fn on_tick(self, state: &mut State, dt: u32) -> bool;
-    fn handle_action(self, state: &mut State, action: Action) -> bool;
+    fn on_enter(&mut self, state: &mut State) -> bool;
+    fn on_leave(&mut self, state: &mut State) -> bool;
+    fn on_tick(&mut self, state: &mut State, dt: u32) -> bool;
+    fn handle_action(&mut self, state: &mut State, action: Action) -> bool;
 }
 
 // Initial room.
@@ -46,20 +47,20 @@ pub struct WakeUp {
 }
 
 impl Room for WakeUp {
-    fn on_enter(self, state: &mut State) -> bool {
+    fn on_enter(&mut self, state: &mut State) -> bool {
         state.schedule_action(Action::Message(String::from("Welcome to the W.O.R.L.D.")));
         true
     }
 
-    fn on_leave(self, state: &mut State) -> bool {
+    fn on_leave(&mut self, state: &mut State) -> bool {
         true
     }
 
-    fn on_tick(self, state: &mut State, dt: u32) -> bool {
+    fn on_tick(&mut self, state: &mut State, dt: u32) -> bool {
         true
     }
 
-    fn handle_action(self, state: &mut State, action: Action) -> bool {
+    fn handle_action(&mut self, state: &mut State, action: Action) -> bool {
         true
     }
 }
@@ -67,12 +68,12 @@ impl Room for WakeUp {
 // #[derive(Debug)]
 pub struct State {
     pub rooms: Vec<Box<Room>>,
-    actions: Vec<Action>,
+    actions: VecDeque<Action>,
 }
 
 impl State {
     pub fn schedule_action(&mut self, action: Action) {
-        self.actions.push(action);
+        self.actions.push_back(action);
     }
 
     pub fn tick(&mut self, dt: u32) {
@@ -80,10 +81,9 @@ impl State {
     }
 
     // Return value indicates redraw required.
-    pub fn handle_action(&mut self, action: &Action) -> bool {
-        // Try handling the action in a room, if that succeeds, then break, else try handling
-        // globally.
-        true
+    pub fn try_handle_room_action(&mut self, action: &Action) -> bool {
+        // Try handling the action in a room, if that succeeds, then return true.
+        false
     }
 }
 
@@ -93,7 +93,7 @@ impl Default for State {
             rooms: vec![
                 Box::new(WakeUp{})
             ],
-            actions: vec![],
+            actions: VecDeque::new(),
         }
     }
 }
@@ -113,6 +113,10 @@ fn main() -> Result<(), io::Error> {
 
     let events = Events::new();
     let mut app: App = Default::default();
+
+    let lvalue = &mut app.state.rooms[0];
+    lvalue.on_enter(&mut app.state);
+
 
     loop {
         let size = terminal.size()?;
@@ -182,12 +186,23 @@ fn main() -> Result<(), io::Error> {
                 _ => {}
             }
             event::Event::Tick => {
-                app.log.push(GameEvent { content: "text ".to_string(), game_event_type: GameEventType::Combat });
                 app.state.tick(0); // TODO dt how?
             }
         }
 
         // Handle game actions here (Timers).
+        while !app.state.actions.is_empty() {
+            let next_action = app.state.actions.pop_front().unwrap();
+            let handled = app.state.try_handle_room_action(&next_action);
+            if handled {
+                break
+            }
+
+            match next_action {
+                Action::Message(message) => app.log.push(GameEvent { content: message, game_event_type: GameEventType::Combat }),
+            }
+
+        }
     }
     Ok(())
 }
