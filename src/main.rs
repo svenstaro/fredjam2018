@@ -38,11 +38,17 @@ use crate::utils::{duration_to_msec_u64, BoxShape};
 
 #[derive(Debug)]
 pub struct App {
+    // The size of the console window.
     pub size: Rect,
+    // The system event, like rendering stuff in the console.
     pub log: Vec<GameEvent>,
+    // The input in the command box.
     pub input: String,
+    // The global game state.
     pub state: State,
+    // The list of rooms.
     pub rooms: HashMap<RoomType, Box<Room>>,
+    // The action event queue.
     pub event_queue: EventQueue,
 }
 
@@ -50,10 +56,10 @@ impl App {
     fn new(state: State) -> Self {
         App {
             size: Default::default(),
-            log: vec![],
+            log: Default::default(),
             input: "".into(),
             state: state,
-            rooms: HashMap::new(),
+            rooms: Default::default(),
             event_queue: Default::default(),
         }
     }
