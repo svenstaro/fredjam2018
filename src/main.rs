@@ -36,15 +36,12 @@ mod utils;
 
 use crate::action::{Action, ActionHandled};
 use crate::commands::try_handle_command;
+use crate::entities::enemy::initialize_enemies;
 use crate::event::{Event, Events};
 use crate::event_queue::EventQueue;
 use crate::game_event::{GameEvent, GameEventType};
-use crate::room::{
-    adjacent_rooms, room_game_name, room_intro_text, Room, RoomType
-};
-use crate::rooms::{
-    CryobayRoom, SlushLobbyRoom,
-};
+use crate::room::{enter_room, Room, RoomType};
+use crate::rooms::{CryobayRoom, SlushLobbyRoom};
 
 use crate::state::State;
 use crate::utils::{duration_to_msec_u64, BoxShape};
@@ -121,16 +118,8 @@ fn main() -> Result<(), io::Error> {
     app.event_queue
         .schedule_action(Action::Enter(RoomType::Cryobay));
 
-    // app.event_queue
-    //     .schedule_timer(Timer::new("example", 0, 10000, Action::Nop, true));
-    // app.event_queue
-    //     .schedule_timer(Timer::new("empty 10000", 0, 10000, Action::Nop, true));
-    // app.event_queue
-    //     .schedule_timer(Timer::new("empty 6000", 0, 6000, Action::Nop, true));
-    // app.event_queue
-    //     .schedule_timer(Timer::new("full 8000", 8000, 8000, Action::Nop, true));
-
     let mut now = Instant::now();
+    initialize_enemies(&mut app.state);
 
     loop {
         let size = terminal.size()?;
@@ -230,7 +219,11 @@ fn main() -> Result<(), io::Error> {
                 .x_bounds([0.0, 100.0])
                 .y_bounds([0.0, 100.0])
                 .render(&mut f, v_chunks_right[1]);
-            let visible_timers = app.event_queue.timers.iter().filter(|timer| timer.is_visual);
+            let visible_timers = app
+                .event_queue
+                .timers
+                .iter()
+                .filter(|timer| timer.is_visual);
             for (index, timer) in visible_timers.enumerate() {
                 // Only render the first 5 timers.
                 if index > 4 {
@@ -310,46 +303,26 @@ fn main() -> Result<(), io::Error> {
                         game_event_type,
                     })
                 }
-                Action::Enter(room) => {
-                    app.state.current_room = room;
-                    let available_rooms = adjacent_rooms(room);
-                    let mut door_msg = String::from("\n\nYou see ")
-                        + &available_rooms.len().to_string()
-                        + " doors labeled:\n";
-                    for room in available_rooms {
-                        door_msg += "  - ";
-                        door_msg += room_game_name(room);
-                        door_msg += "\n";
-                    }
-                    app.event_queue.schedule_action(Action::Message(
-                        String::from(room_intro_text(room).to_owned() + &door_msg),
-                        GameEventType::Normal,
-                    ));
+                Action::Enter(room_type) => {
+                    enter_room(&mut app, room_type);
                 }
                 Action::Leave(_) => {}
                 Action::Command(tokens) => app.try_handle_command(tokens),
                 Action::EnemyAttack => {
-                    eprintln!("{:?}", app.state.current_room);
-                    eprintln!("{:?}", app.state.enemies);
                     let enemy_option = app.state.get_current_enemy(app.state.current_room);
-                    eprintln!("{:?}", enemy_option);
                     let enemy_match = match enemy_option {
-                        Some(ref enemy) => Some((
-                            enemy.get_enemy_type(),
-                            enemy.get_attack_strength(),
-                        )),
+                        Some(ref enemy) => {
+                            Some((enemy.get_enemy_type(), enemy.get_attack_strength()))
+                        }
                         None => None,
                     };
-                    eprintln!("{:?}", enemy_match);
 
                     if let Some((enemy_type, attack_strength)) = enemy_match {
                         app.state.player.health -= attack_strength;
                         app.log.push_front(GameEvent {
                             content: format!(
                                 "{:?} attacks you! You lose {} HP, you now have {} HP\n",
-                                enemy_type,
-                                attack_strength,
-                                app.state.player.health,
+                                enemy_type, attack_strength, app.state.player.health,
                             ),
                             game_event_type: GameEventType::Combat,
                         });

@@ -83,12 +83,15 @@ impl Enemy for GenericEnemy {
                 false,
             ),
             Timer::new(
-                &String::from(format!("The {:?} is preparing to attack you.", self.enemy_type)),
+                &String::from(format!(
+                    "The {:?} is preparing to attack you.",
+                    self.enemy_type
+                )),
                 0,
                 self.timer_length,
                 Action::EnemyAttack,
                 true,
-            )
+            ),
         ]
     }
 }
