@@ -150,7 +150,10 @@ fn main() -> Result<(), io::Error> {
                             width: 20,
                             height: 20,
                         },
-                        color: Color::White,
+                        color: match app.state.current_room {
+                            RoomType::Cryobay => Color::Red,
+                            _ => Color::White,
+                        },
                     });
                     ctx.draw(&BoxShape {
                         rect: Rect {
@@ -159,7 +162,10 @@ fn main() -> Result<(), io::Error> {
                             width: 20,
                             height: 20,
                         },
-                        color: Color::White,
+                        color: match app.state.current_room {
+                            RoomType::SlushLobby => Color::Red,
+                            _ => Color::White,
+                        },
                     });
                 })
                 .x_bounds([0.0, 100.0])
