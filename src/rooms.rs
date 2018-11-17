@@ -1,6 +1,6 @@
-use std::fmt::Debug;
 use crate::EventQueue;
 use crate::{Action, GameEventType, State};
+use std::fmt::Debug;
 
 pub trait Room: Debug {
     fn handle_action(
