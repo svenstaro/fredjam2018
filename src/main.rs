@@ -142,11 +142,12 @@ fn main() -> Result<(), io::Error> {
                 .direction(Direction::Vertical)
                 .constraints(
                     [
-                        Constraint::Length(3),
-                        Constraint::Length(3),
-                        Constraint::Length(3),
-                        Constraint::Length(3),
-                        Constraint::Length(3),
+                        Constraint::Max(3),
+                        Constraint::Max(3),
+                        Constraint::Max(3),
+                        Constraint::Max(3),
+                        Constraint::Max(3),
+                        Constraint::Max(0),
                     ]
                     .as_ref(),
                 )
@@ -296,11 +297,10 @@ fn main() -> Result<(), io::Error> {
                 }
                 Action::PlayerDied => {
                     app.event_queue.schedule_action(Action::Message(
-                            String::from("You died."),
-                            GameEventType::Failure,
-                            ));
+                        String::from("You died."),
+                        GameEventType::Failure,
+                    ));
                 }
-
 
                 Action::Tick(dt) => {
                     app.event_queue.tick(dt);

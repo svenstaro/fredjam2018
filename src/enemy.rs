@@ -86,8 +86,8 @@ impl Enemy for GenericEnemy {
 
         Timer::new(
             &format!("{:?} attack timer", self.enemy_type),
-            self.timer_length,
             0,
+            self.timer_length,
             timings,
         )
     }
