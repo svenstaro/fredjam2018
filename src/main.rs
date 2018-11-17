@@ -27,31 +27,52 @@ pub struct GameEvent {
     pub game_event_type: GameEventType,
 }
 
-
+// TODO Extend this to have timers (if needed?)
 #[derive(Debug)]
 pub enum Action {
+    Message(String),
+}
 
+pub trait Room {
+    fn on_enter(self, state: &mut State) -> bool;
+    fn on_leave(self, state: &mut State) -> bool;
+    fn on_tick(self, state: &mut State, dt: u32) -> bool;
+    fn handle_action(self, state: &mut State, action: Action) -> bool;
 }
 
 // Initial room.
-pub struct WakeUp {}
+#[derive(Default)]
+pub struct WakeUp {
+}
 
-pub trait Room {
-    fn on_enter(self) -> bool;
-    fn on_leave(self) -> bool;
-    fn on_tick(self, dt: u32);
-    fn handle_action(self, action: Action) -> bool;
+impl Room for WakeUp {
+    fn on_enter(self, state: &mut State) -> bool {
+        state.schedule_action(Action::Message(String::from("Welcome to the W.O.R.L.D.")));
+        true
+    }
+
+    fn on_leave(self, state: &mut State) -> bool {
+        true
+    }
+
+    fn on_tick(self, state: &mut State, dt: u32) -> bool {
+        true
+    }
+
+    fn handle_action(self, state: &mut State, action: Action) -> bool {
+        true
+    }
 }
 
 // #[derive(Debug)]
-#[derive(Default)]
 pub struct State {
     pub rooms: Vec<Box<Room>>,
+    actions: Vec<Action>,
 }
 
 impl State {
-    pub fn schedule_action(&mut self, action: &Action) {
-        // Append action to timers.
+    pub fn schedule_action(&mut self, action: Action) {
+        self.actions.push(action);
     }
 
     pub fn tick(&mut self, dt: u32) {
@@ -63,6 +84,17 @@ impl State {
         // Try handling the action in a room, if that succeeds, then break, else try handling
         // globally.
         true
+    }
+}
+
+impl Default for State {
+    fn default() -> Self {
+        State {
+            rooms: vec![
+                Box::new(WakeUp{})
+            ],
+            actions: vec![],
+        }
     }
 }
 
