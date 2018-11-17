@@ -94,7 +94,7 @@ fn main() -> Result<(), io::Error> {
 
         match events.next().unwrap() {
             Event::Input(input) => match input {
-                Key::Char('q') => {
+                Key::Esc => {
                     break;
                 }
                 Key::Char('\n') => {
