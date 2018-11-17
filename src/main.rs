@@ -19,6 +19,7 @@ use crate::event::{Event, Events};
 use crate::rooms::{LockedRoom, Room, RoomType, WakeUpRoom};
 use crate::utils::BoxShape;
 
+#[derive(Debug, PartialEq, Eq, Hash)]
 pub enum GameEventType {
     Combat,
     Normal,
@@ -27,12 +28,14 @@ pub enum GameEventType {
     Debug,
 }
 
+#[derive(Debug)]
 pub struct GameEvent {
     pub content: String,
     pub game_event_type: GameEventType,
 }
 
 // TODO Extend this to have timers (if needed?)
+#[derive(Debug, PartialEq, Eq, Hash)]
 pub enum Action {
     // String is room name.
     Enter(RoomType),
@@ -43,6 +46,7 @@ pub enum Action {
     Command(String),
 }
 
+#[derive(Debug)]
 pub struct State {
     pub current_room: RoomType,
 }
@@ -55,7 +59,7 @@ impl State {
     }
 }
 
-#[derive(Default)]
+#[derive(Debug, Default)]
 pub struct EventQueue {
     pub actions: VecDeque<Action>,
 }
@@ -74,6 +78,7 @@ impl EventQueue {
     }
 }
 
+#[derive(Debug)]
 pub struct App {
     pub size: Rect,
     pub log: Vec<GameEvent>,
