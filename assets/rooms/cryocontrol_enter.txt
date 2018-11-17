@@ -1,0 +1,5 @@
+You press the 'open' button next to the door to cryocontrol. The door vanishes, revealing a room bathed in red light. There are holos on the walls, some frantically flashing, some showing rapidly jumping readouts of cryo devices.
+
+TODO fight:
+  - bioengineered cleaning rat
+  - should be easy to kill but still scary
