@@ -144,7 +144,14 @@ impl Iterator for MusicPlayback {
 
     #[inline]
     fn size_hint(&self) -> (usize, Option<usize>) {
-        (self.data_cursors.get(&self.current_track).unwrap().size_hint().0, None)
+        (
+            self.data_cursors
+                .get(&self.current_track)
+                .unwrap()
+                .size_hint()
+                .0,
+            None,
+        )
     }
 }
 

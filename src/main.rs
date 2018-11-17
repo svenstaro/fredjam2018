@@ -342,18 +342,19 @@ fn main() -> Result<(), io::Error> {
                             if enemy.get_health() <= 0 {
                                 app.state.enemies.remove(&app.state.current_room);
                                 app.event_queue.schedule_action(Action::Message(
-                                        String::from("The enemy has been slain."),
-                                        GameEventType::Failure,
-                                        ));
-                                app.event_queue.emplace_timers(TimerType::EnemyAttack, vec![]);
+                                    String::from("The enemy has been slain."),
+                                    GameEventType::Failure,
+                                ));
+                                app.event_queue
+                                    .emplace_timers(TimerType::EnemyAttack, vec![]);
                             }
                         }
                         None => {
                             app.event_queue.schedule_action(Action::Message(
-                                    String::from("There is nothing you can attack."),
-                                    GameEventType::Failure,
-                                    ));
-                        },
+                                String::from("There is nothing you can attack."),
+                                GameEventType::Failure,
+                            ));
+                        }
                     };
                 }
                 Action::PlayerDied => {

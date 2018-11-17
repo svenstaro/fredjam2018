@@ -18,7 +18,14 @@ pub struct Timer {
 }
 
 impl Timer {
-    pub fn new(timer_type: TimerType, label: &str, elapsed: u64, duration: u64, action: Action, is_visual: bool) -> Self {
+    pub fn new(
+        timer_type: TimerType,
+        label: &str,
+        elapsed: u64,
+        duration: u64,
+        action: Action,
+        is_visual: bool,
+    ) -> Self {
         Timer {
             timer_type,
             label: label.to_string(),
