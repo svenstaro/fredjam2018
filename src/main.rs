@@ -11,7 +11,7 @@ use tui::backend::TermionBackend;
 use tui::layout::{Constraint, Direction, Layout, Rect};
 use tui::style::{Color, Style};
 use tui::widgets::canvas::Canvas;
-use tui::widgets::{Gauge, Block, Borders, Paragraph, Text, Widget};
+use tui::widgets::{Block, Borders, Gauge, Paragraph, Text, Widget};
 use tui::Terminal;
 use unicode_width::UnicodeWidthStr;
 
@@ -173,7 +173,7 @@ fn main() -> Result<(), io::Error> {
                 .y_bounds([0.0, 100.0])
                 .render(&mut f, v_chunks_right[1]);
             for timer in &app.event_queue.timers {
-                 Gauge::default()
+                Gauge::default()
                     .block(Block::default().title("TODO label").borders(Borders::ALL))
                     .style(Style::default().fg(Color::Magenta).bg(Color::Green))
                     .percent(50)
