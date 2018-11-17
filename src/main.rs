@@ -1,9 +1,9 @@
 use self::sound::{AudioEvent, Effect};
 use std::collections::HashMap;
-use std::time::Instant;
 use std::io::{self, Write};
 use std::sync::mpsc::channel;
 use std::thread;
+use std::time::Instant;
 use termion::cursor::Goto;
 use termion::event::Key;
 use termion::raw::IntoRawMode;
@@ -29,7 +29,7 @@ use crate::action::Action;
 use crate::event::{Event, Events};
 use crate::event_queue::EventQueue;
 use crate::game_event::{GameEvent, GameEventType};
-use crate::rooms::{LockedRoom, Room, RoomType, WakeUpRoom};
+use crate::rooms::{CryobayRoom, LockedRoom, Room, RoomType};
 use crate::state::State;
 use crate::utils::{duration_to_msec_u64, BoxShape};
 
@@ -85,11 +85,11 @@ fn main() -> Result<(), io::Error> {
     let mut app = App::new(state);
 
     app.rooms
-        .insert(RoomType::WakeUp, Box::new(WakeUpRoom { lever: false }));
+        .insert(RoomType::Cryobay, Box::new(CryobayRoom { lever: false }));
     app.rooms.insert(RoomType::Locked, Box::new(LockedRoom {}));
 
     app.event_queue
-        .schedule_action(Action::Enter(RoomType::WakeUp));
+        .schedule_action(Action::Enter(RoomType::Cryobay));
 
     let mut now = Instant::now();
 

@@ -8,7 +8,7 @@ pub struct State {
 impl State {
     pub fn new() -> Self {
         State {
-            current_room: RoomType::WakeUp,
+            current_room: RoomType::Cryobay,
         }
     }
 }
