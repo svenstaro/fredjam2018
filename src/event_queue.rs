@@ -17,6 +17,12 @@ impl EventQueue {
         self.timers.push(timer);
     }
 
+    pub fn schedule_timers(&mut self, timers: Vec<Timer>) {
+        for timer in timers {
+            self.timers.push(timer);
+        }
+    }
+
     pub fn tick(&mut self, dt: u64) {
         for timer in &mut self.timers {
             timer.tick(dt);

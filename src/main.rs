@@ -39,9 +39,8 @@ use crate::commands::try_handle_command;
 use crate::event::{Event, Events};
 use crate::event_queue::EventQueue;
 use crate::game_event::{GameEvent, GameEventType};
-use crate::room::{
-    adjacent_rooms, room_game_name, room_intro_text, Room, RoomType
-};
+use crate::room::{Room, RoomType, enter_room,};
+use crate::entities::enemy::initialize_enemies;
 use crate::rooms::{
     CryobayRoom, SlushLobbyRoom,
 };
@@ -122,6 +121,7 @@ fn main() -> Result<(), io::Error> {
         .schedule_action(Action::Enter(RoomType::Cryobay));
 
     let mut now = Instant::now();
+    initialize_enemies(&mut app.state);
 
     loop {
         let size = terminal.size()?;
@@ -301,21 +301,8 @@ fn main() -> Result<(), io::Error> {
                         game_event_type,
                     })
                 }
-                Action::Enter(room) => {
-                    app.state.current_room = room;
-                    let available_rooms = adjacent_rooms(room);
-                    let mut door_msg = String::from("\n\nYou see ")
-                        + &available_rooms.len().to_string()
-                        + " doors labeled:\n";
-                    for room in available_rooms {
-                        door_msg += "  - ";
-                        door_msg += room_game_name(room);
-                        door_msg += "\n";
-                    }
-                    app.event_queue.schedule_action(Action::Message(
-                        String::from(room_intro_text(room).to_owned() + &door_msg),
-                        GameEventType::Normal,
-                    ));
+                Action::Enter(room_type) => {
+                    enter_room(&mut app, room_type);
                 }
                 Action::Leave(_) => {}
                 Action::Command(tokens) => app.try_handle_command(tokens),

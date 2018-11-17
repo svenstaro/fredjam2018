@@ -20,22 +20,7 @@ impl Room for SlushLobbyRoom {
         event_queue: &mut EventQueue,
         action: &Action,
     ) -> ActionHandled {
-        match action {
-            Action::Enter(room_type) => match room_type {
-                RoomType::SlushLobby => {
-                    let rat = GenericEnemy::new(EnemyType::Rat, 5, 1, 60 * 1000);
-                    let timers = rat.get_attack_timers();
-                    for timer in timers {
-                        event_queue.schedule_timer(timer);
-                    }
-                    state.enemies.insert(RoomType::Cryobay, Box::new(rat));
-
-                    ActionHandled::NotHandled
-                }
-                _ => ActionHandled::NotHandled,
-            },
-            _ => return ActionHandled::NotHandled,
-        }
+        ActionHandled::NotHandled
     }
 }
 
