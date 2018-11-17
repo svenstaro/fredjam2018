@@ -149,6 +149,10 @@ fn main() -> Result<(), io::Error> {
                 .direction(Direction::Vertical)
                 .constraints([Constraint::Length(3), Constraint::Min(1)].as_ref())
                 .split(h_chunks[0]);
+            let input_status_line = Layout::default()
+                .direction(Direction::Horizontal)
+                .constraints([Constraint::Percentage(50), Constraint::Percentage(50)].as_ref())
+                .split(v_chunks_left[0]);
             let v_chunks_right = Layout::default()
                 .direction(Direction::Vertical)
                 .constraints([Constraint::Percentage(30), Constraint::Percentage(70)].as_ref())
@@ -188,7 +192,11 @@ fn main() -> Result<(), io::Error> {
             Paragraph::new([Text::raw(&app.input)].iter())
                 .style(Style::default().fg(Color::Yellow))
                 .block(Block::default().borders(Borders::ALL).title("Input"))
-                .render(&mut f, v_chunks_left[0]);
+                .render(&mut f, input_status_line[0]);
+            Paragraph::new(app.state.player.format_player_info().iter())
+                .style(Style::default())
+                .block(Block::default().borders(Borders::ALL).title("Character"))
+                .render(&mut f, input_status_line[1]);
             Canvas::default()
                 .block(Block::default().borders(Borders::ALL).title("Map"))
                 .paint(|ctx| {
