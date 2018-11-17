@@ -312,6 +312,8 @@ fn main() -> Result<(), io::Error> {
                     let enemy_option = app.state.get_current_enemy(app.state.current_room);
                     let enemy_match = match enemy_option {
                         Some(ref enemy) => {
+                            let timers = enemy.get_attack_timers();
+                            app.event_queue.schedule_timers(timers);
                             Some((enemy.get_enemy_type(), enemy.get_attack_strength()))
                         }
                         None => None,
