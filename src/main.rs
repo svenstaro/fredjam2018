@@ -16,10 +16,9 @@ mod rooms;
 mod utils;
 
 use crate::event::{Event, Events};
-use crate::rooms::{LockedRoom, Room, WakeUpRoom};
+use crate::rooms::{LockedRoom, Room, RoomType, WakeUpRoom};
 use crate::utils::BoxShape;
 
-#[derive(Debug)]
 pub enum GameEventType {
     Combat,
     Normal,
@@ -28,7 +27,6 @@ pub enum GameEventType {
     Debug,
 }
 
-#[derive(Debug)]
 pub struct GameEvent {
     pub content: String,
     pub game_event_type: GameEventType,
@@ -37,55 +35,42 @@ pub struct GameEvent {
 // TODO Extend this to have timers (if needed?)
 pub enum Action {
     // String is room name.
-    Enter(&'static str),
+    Enter(RoomType),
     Tick(u32),
     // String is room name.
-    Leave(&'static str),
+    Leave(RoomType),
     Message(String, GameEventType),
     Command(String),
 }
 
 pub struct State {
-    pub rooms: HashMap<&'static str, Box<Room>>,
-    pub current_room: &'static str,
-    actions: VecDeque<Action>,
-}
-
-impl State {
-    pub fn schedule_action(&mut self, action: Action) {
-        self.actions.push_back(action);
-    }
-
-    // Return value indicates redraw required.
-    pub fn try_handle_room_action(&mut self, action: &Action) -> bool {
-        // Try handling the action in a room, if that succeeds, then return true.
-        let mut keys = vec![];
-        for key in self.rooms.keys() {
-            keys.push(*key);
-        }
-
-        for name in keys {
-            let mut room = self.rooms.remove(name).unwrap();
-            let handled = room.handle_action(self, action);
-            self.rooms.insert(name, room);
-            if handled {
-                return true;
-            }
-        }
-        false
-    }
+    pub current_room: RoomType,
 }
 
 impl State {
     fn new() -> Self {
-        let mut rooms: HashMap<&'static str, Box<Room>> = HashMap::new();
-        rooms.insert("WakeUp", Box::new(WakeUpRoom { lever: false }));
-        rooms.insert("Locked", Box::new(LockedRoom {}));
         State {
-            rooms,
-            current_room: "WakeUp",
-            actions: VecDeque::new(),
+            current_room: RoomType::WakeUp,
         }
+    }
+}
+
+#[derive(Default)]
+pub struct EventQueue {
+    pub actions: VecDeque<Action>,
+}
+
+impl EventQueue {
+    pub fn schedule_action(&mut self, action: Action) {
+        self.actions.push_back(action);
+    }
+
+    pub fn is_empty(&self) -> bool {
+        self.actions.is_empty()
+    }
+
+    pub fn get_next_action(&mut self) -> Option<Action> {
+        self.actions.pop_front()
     }
 }
 
@@ -94,6 +79,8 @@ pub struct App {
     pub log: Vec<GameEvent>,
     pub input: String,
     pub state: State,
+    pub rooms: HashMap<RoomType, Box<Room>>,
+    pub event_queue: EventQueue,
 }
 
 impl App {
@@ -103,7 +90,21 @@ impl App {
             log: vec![],
             input: "".into(),
             state: state,
+            rooms: HashMap::new(),
+            event_queue: Default::default(),
         }
+    }
+
+    // Return value indicates redraw required.
+    pub fn try_handle_room_action(&mut self, action: &Action) -> bool {
+        // Try handling the action in a room, if that succeeds, then return true.
+        for (_, ref mut room) in &mut self.rooms {
+            let handled = room.handle_action(&mut self.state, &mut self.event_queue, action);
+            if handled {
+                return true;
+            }
+        }
+        false
     }
 }
 
@@ -116,9 +117,12 @@ fn main() -> Result<(), io::Error> {
     let state = State::new();
     let mut app = App::new(state);
 
-    let mut wake_up = app.state.rooms.remove("WakeUp").unwrap();
-    wake_up.handle_action(&mut app.state, &Action::Enter("WakeUp"));
-    app.state.rooms.insert("WakeUp", wake_up);
+    app.rooms
+        .insert(RoomType::WakeUp, Box::new(WakeUpRoom { lever: false }));
+    app.rooms.insert(RoomType::Locked, Box::new(LockedRoom {}));
+
+    app.event_queue
+        .schedule_action(Action::Enter(RoomType::WakeUp));
 
     loop {
         let size = terminal.size()?;
@@ -208,7 +212,7 @@ fn main() -> Result<(), io::Error> {
                         content,
                         game_event_type: GameEventType::Normal,
                     });
-                    app.state.schedule_action(command);
+                    app.event_queue.schedule_action(command);
                 }
                 Key::Char(c) => {
                     app.input.push(c);
@@ -220,14 +224,14 @@ fn main() -> Result<(), io::Error> {
             },
             event::Event::Tick => {
                 // TODO dt how?
-                app.state.schedule_action(Action::Tick(0));
+                app.event_queue.schedule_action(Action::Tick(0));
             }
         }
 
         // Handle game actions here (Timers).
-        while !app.state.actions.is_empty() {
-            let next_action = app.state.actions.pop_front().unwrap();
-            let handled = app.state.try_handle_room_action(&next_action);
+        while !app.event_queue.is_empty() {
+            let next_action = app.event_queue.get_next_action().unwrap();
+            let handled = app.try_handle_room_action(&next_action);
             if handled {
                 break;
             }
