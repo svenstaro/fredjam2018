@@ -43,7 +43,12 @@ impl CorridorRoom {
 }
 
 impl Room for CorridorRoom {
-    fn handle_action(&mut self, state: &mut State, event_queue: &mut EventQueue, action: &Action, ) -> ActionHandled {
+    fn handle_action(
+        &mut self,
+        state: &mut State,
+        event_queue: &mut EventQueue,
+        action: &Action,
+    ) -> ActionHandled {
         ActionHandled::NotHandled
     }
 }
