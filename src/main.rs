@@ -106,13 +106,13 @@ fn main() -> Result<(), io::Error> {
         .schedule_action(Action::Enter(RoomType::Cryobay));
 
     // app.event_queue
-    //     .schedule_timer(Timer::new("example", 0, 10000, Default::default()));
+    //     .schedule_timer(Timer::new("example", 0, 10000, Action::Nop, true));
     // app.event_queue
-    //     .schedule_timer(Timer::new("empty 10000", 0, 10000, Default::default()));
+    //     .schedule_timer(Timer::new("empty 10000", 0, 10000, Action::Nop, true));
     // app.event_queue
-    //     .schedule_timer(Timer::new("empty 6000", 0, 6000, Default::default()));
+    //     .schedule_timer(Timer::new("empty 6000", 0, 6000, Action::Nop, true));
     // app.event_queue
-    //     .schedule_timer(Timer::new("full 8000", 8000, 8000, Default::default()));
+    //     .schedule_timer(Timer::new("full 8000", 8000, 8000, Action::Nop, true));
 
     let mut now = Instant::now();
 
@@ -168,12 +168,12 @@ fn main() -> Result<(), io::Error> {
                 log
             };
             Paragraph::new(styled_log.iter())
-                .block(Block::default().borders(Borders::ALL).title("Input"))
+                .block(Block::default().borders(Borders::ALL).title("Log"))
                 .wrap(true)
                 .render(&mut f, v_chunks_left[1]);
             Paragraph::new([Text::raw(&app.input)].iter())
                 .style(Style::default().fg(Color::Yellow))
-                .block(Block::default().borders(Borders::ALL).title("Events"))
+                .block(Block::default().borders(Borders::ALL).title("Input"))
                 .render(&mut f, v_chunks_left[0]);
             Canvas::default()
                 .block(Block::default().borders(Borders::ALL).title("Map"))
@@ -206,11 +206,13 @@ fn main() -> Result<(), io::Error> {
                 .x_bounds([0.0, 100.0])
                 .y_bounds([0.0, 100.0])
                 .render(&mut f, v_chunks_right[1]);
-            for (index, timer) in app.event_queue.timers.iter().enumerate() {
+            let visible_timers = app.event_queue.timers.iter().filter(|timer| timer.is_visual);
+            for (index, timer) in visible_timers.enumerate() {
                 // Only render the first 5 timers.
                 if index > 4 {
                     break;
                 }
+
                 let int_progress = clamp(
                     (timer.duration as i64 - timer.elapsed as i64) * 100i64 / timer.duration as i64,
                     0,
@@ -220,7 +222,7 @@ fn main() -> Result<(), io::Error> {
                     .block(Block::default().title(&timer.label).borders(Borders::ALL))
                     .style(Style::default().fg(Color::Magenta).bg(Color::Green))
                     .percent(int_progress)
-                    .label(&format!("Gauge label {}/100", int_progress))
+                    .label(&format!("{}", int_progress))
                     .render(&mut f, v_chunks_right_up[index]);
             }
         })?;
@@ -291,6 +293,15 @@ fn main() -> Result<(), io::Error> {
                 Action::EnemyAttack => {
                     if let Some(ref enemy) = app.state.enemy {
                         app.state.player.health -= enemy.get_attack_strength();
+                        app.log.push_front(GameEvent {
+                            content: format!(
+                                "{:?} attacks you! You lose {} HP, you now have {} HP\n",
+                                enemy.get_enemy_type(),
+                                enemy.get_attack_strength(),
+                                app.state.player.health,
+                            ),
+                            game_event_type: GameEventType::Combat,
+                        });
                         if app.state.player.health <= 0 {
                             app.event_queue.schedule_action(Action::PlayerDied);
                         }

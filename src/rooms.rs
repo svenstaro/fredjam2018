@@ -43,8 +43,10 @@ impl Room for CryobayRoom {
             Action::Enter(room_type) => match room_type {
                 RoomType::Cryobay => {
                     let rat = GenericEnemy::new(EnemyType::Rat, 5, 1, 60 * 1000);
-                    let timer = rat.get_attack_timer();
-                    event_queue.schedule_timer(timer);
+                    let timers = rat.get_attack_timers();
+                    for timer in timers {
+                        event_queue.schedule_timer(timer);
+                    }
                     state.enemy = Some(Box::new(rat));
 
                     ActionHandled::NotHandled
@@ -127,8 +129,10 @@ impl Room for SlushLobbyRoom {
             Action::Enter(room_type) => match room_type {
                 RoomType::SlushLobby => {
                     let rat = GenericEnemy::new(EnemyType::Rat, 5, 1, 60 * 1000);
-                    let timer = rat.get_attack_timer();
-                    event_queue.schedule_timer(timer);
+                    let timers = rat.get_attack_timers();
+                    for timer in timers {
+                        event_queue.schedule_timer(timer);
+                    }
                     state.enemy = Some(Box::new(rat));
 
                     ActionHandled::NotHandled
