@@ -14,6 +14,7 @@ pub trait Room: Debug {
     ) -> ActionHandled;
 
     fn visit(&mut self);
+    fn is_visited(&self) -> bool;
 }
 
 #[derive(Debug, PartialEq, Eq, Hash, Clone, Copy)]
@@ -33,12 +34,24 @@ pub fn room_game_name(room_type: RoomType) -> &'static str {
     }
 }
 
-pub fn room_intro_text(room_type: RoomType) -> &'static str {
+pub fn room_intro_text(room_type: RoomType) -> (&'static str, &'static str) {
     match room_type {
-        RoomType::Cryobay => include_str!("../assets/rooms/cryobay_enter.txt"),
-        RoomType::SlushLobby => include_str!("../assets/rooms/slush_lobby_enter.txt"),
-        RoomType::Cryocontrol => include_str!("../assets/rooms/cryocontrol_enter.txt"),
-        RoomType::Corridor => include_str!("../assets/rooms/corridor_enter.txt"),
+        RoomType::Cryobay => (
+            include_str!("../assets/rooms/cryobay_enter.txt"),
+            include_str!("../assets/rooms/cryobay_enter_first.txt")
+        ),
+        RoomType::SlushLobby => (
+            include_str!("../assets/rooms/slush_lobby_enter.txt"),
+            include_str!("../assets/rooms/slush_lobby_enter_first.txt"),
+        ),
+        RoomType::Cryocontrol => (
+            include_str!("../assets/rooms/cryocontrol_enter.txt"),
+            include_str!("../assets/rooms/cryocontrol_enter_first.txt"),
+        ),
+        RoomType::Corridor => (
+            include_str!("../assets/rooms/corridor_enter.txt"),
+            include_str!("../assets/rooms/corridor_enter_first.txt"),
+        ),
     }
 }
 
@@ -62,7 +75,6 @@ pub fn room_type_from_name(room_name: &str) -> Option<RoomType> {
 }
 
 pub fn enter_room(app: &mut App, room_type: RoomType) {
-    app.rooms.get_mut(&room_type).unwrap().visit();
     let enemy_option = app.state.get_current_enemy(room_type);
     match enemy_option {
         Some(enemy) => {
@@ -81,8 +93,16 @@ pub fn enter_room(app: &mut App, room_type: RoomType) {
         door_msg += room_game_name(room);
         door_msg += "\n";
     }
-    app.event_queue.schedule_action(Action::Message(
-        String::from(room_intro_text(room_type).to_owned() + &door_msg),
-        GameEventType::Normal,
-    ));
+    if app.rooms.get(&room_type).unwrap().is_visited() {
+        app.event_queue.schedule_action(Action::Message(
+            String::from(room_intro_text(room_type).0.to_owned() + &door_msg),
+            GameEventType::Normal,
+        ));
+    } else {
+        app.event_queue.schedule_action(Action::Message(
+            String::from(room_intro_text(room_type).1.to_owned() + &door_msg),
+            GameEventType::Normal,
+        ));
+    }
+    app.rooms.get_mut(&room_type).unwrap().visit();
 }
