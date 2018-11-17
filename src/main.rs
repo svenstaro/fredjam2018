@@ -17,6 +17,10 @@ use tui::widgets::canvas::Canvas;
 use tui::widgets::{Block, Borders, Gauge, Paragraph, Text, Widget};
 use tui::Terminal;
 use unicode_width::UnicodeWidthStr;
+use std::ops::Add;
+
+#[macro_use]
+extern crate strum_macros;
 
 mod action;
 mod commands;
@@ -37,7 +41,7 @@ use crate::enemy::Enemy;
 use crate::event::{Event, Events};
 use crate::event_queue::EventQueue;
 use crate::game_event::{GameEvent, GameEventType};
-use crate::rooms::{room_intro_text, CryobayRoom, Room, RoomType, SlushLobbyRoom};
+use crate::rooms::{room_intro_text, adjacent_rooms, CryobayRoom, Room, RoomType, SlushLobbyRoom, room_game_name};
 use crate::state::State;
 use crate::utils::{duration_to_msec_u64, BoxShape};
 
@@ -176,12 +180,12 @@ fn main() -> Result<(), io::Error> {
                 log
             };
             Paragraph::new(styled_log.iter())
-                .block(Block::default().borders(Borders::ALL).title("Input"))
+                .block(Block::default().borders(Borders::ALL).title("Events"))
                 .wrap(true)
                 .render(&mut f, v_chunks_left[1]);
             Paragraph::new([Text::raw(&app.input)].iter())
                 .style(Style::default().fg(Color::Yellow))
-                .block(Block::default().borders(Borders::ALL).title("Events"))
+                .block(Block::default().borders(Borders::ALL).title("Input"))
                 .render(&mut f, v_chunks_left[0]);
             Canvas::default()
                 .block(Block::default().borders(Borders::ALL).title("Map"))
@@ -293,12 +297,20 @@ fn main() -> Result<(), io::Error> {
                     })
                 }
                 Action::Enter(room) => {
+                    app.state.current_room = room;
+                    let available_rooms = adjacent_rooms(room);
+                    let mut door_msg = String::from("\n\nYou see ") + &available_rooms.len().to_string() + " doors labeled:\n";
+                    for room in available_rooms {
+                        door_msg += "  - ";
+                        door_msg += room_game_name(room);
+                        door_msg += "\n";
+                    }
                     app.event_queue.schedule_action(Action::Message(
-                        String::from(room_intro_text(room).to_owned() + "\n"),
+                        String::from(room_intro_text(room).to_owned() + &door_msg),
                         GameEventType::Normal,
                     ));
-                    app.state.current_room = room;
                 }
+                Action::Leave(_) => {}
                 Action::Command(tokens) => app.try_handle_command(tokens),
                 Action::EnemyAttack => {
                     let enemy_option = { app.state.get_current_enemy(app.state.current_room) };
@@ -315,7 +327,6 @@ fn main() -> Result<(), io::Error> {
                         GameEventType::Failure,
                     ));
                 }
-
                 Action::Tick(dt) => {
                     app.event_queue.tick(dt);
                 }
