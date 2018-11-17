@@ -248,15 +248,17 @@ fn main() -> Result<(), io::Error> {
                     break;
                 }
                 Key::Char('\n') => {
-                    let mut content: String = app.input.drain(..).collect();
-                    let command = Action::Command(content.clone());
-                    snd_send.send(AudioEvent::Track(Track::Intro));
-                    content.push('\n');
-                    app.log.push_front(GameEvent {
-                        content,
-                        game_event_type: GameEventType::Normal,
-                    });
-                    app.event_queue.schedule_action(command);
+                    if !app.input.is_empty() {
+                        let mut content: String = app.input.drain(..).collect();
+                        let command = Action::Command(content.clone());
+                        snd_send.send(AudioEvent::Track(Track::Intro));
+                        content.push('\n');
+                        app.log.push_front(GameEvent {
+                            content,
+                            game_event_type: GameEventType::Normal,
+                        });
+                        app.event_queue.schedule_action(command);
+                    }
                 }
                 Key::Char(c) => {
                     snd_send.send(AudioEvent::Effect(Effect::BeepLong));
