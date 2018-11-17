@@ -19,9 +19,9 @@ pub enum RoomType {
     Cryobay,
     SlushLobby,
     Cryocontrol,
+    Corridor,
 }
 
-// Initial room.
 #[derive(Debug)]
 pub struct CryobayRoom {
     pub lever: bool,
@@ -30,6 +30,21 @@ pub struct CryobayRoom {
 impl CryobayRoom {
     pub fn new() -> CryobayRoom {
         CryobayRoom { lever: false }
+    }
+}
+
+#[derive(Debug)]
+pub struct CorridorRoom {}
+
+impl CorridorRoom {
+    pub fn new() -> CorridorRoom {
+        CorridorRoom {}
+    }
+}
+
+impl Room for CorridorRoom {
+    fn handle_action(&mut self, state: &mut State, event_queue: &mut EventQueue, action: &Action, ) -> ActionHandled {
+        ActionHandled::NotHandled
     }
 }
 
@@ -70,6 +85,7 @@ pub fn room_game_name(room_type: RoomType) -> &'static str {
         RoomType::Cryobay => "cryobay",
         RoomType::SlushLobby => "slush lobby",
         RoomType::Cryocontrol => "cryocontrol",
+        RoomType::Corridor => "corridor",
     }
 }
 
@@ -78,6 +94,7 @@ pub fn room_intro_text(room_type: RoomType) -> &'static str {
         RoomType::Cryobay => include_str!("../assets/rooms/cryobay_enter.txt"),
         RoomType::SlushLobby => include_str!("../assets/rooms/slush_lobby_enter.txt"),
         RoomType::Cryocontrol => include_str!("../assets/rooms/cryocontrol_enter.txt"),
+        RoomType::Corridor => include_str!("../assets/rooms/corridor_enter.txt"),
     }
 }
 
@@ -86,6 +103,7 @@ pub fn adjacent_rooms(room_type: RoomType) -> Vec<RoomType> {
         RoomType::Cryobay => vec![RoomType::SlushLobby],
         RoomType::SlushLobby => vec![RoomType::Cryobay, RoomType::Cryocontrol],
         RoomType::Cryocontrol => vec![RoomType::SlushLobby],
+        RoomType::Corridor => vec![RoomType::Cryocontrol],
     }
 }
 
@@ -94,6 +112,7 @@ pub fn room_type_from_name(room_name: &str) -> Option<RoomType> {
         "cryobay" => Some(RoomType::Cryobay),
         "slush lobby" => Some(RoomType::SlushLobby),
         "cryocontrol" => Some(RoomType::Cryocontrol),
+        "corridor" => Some(RoomType::Corridor),
         _ => None,
     }
 }

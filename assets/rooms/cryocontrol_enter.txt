@@ -3,4 +3,3 @@ You press the 'open' button next to the door to cryocontrol. The door vanishes, 
 TODO fight:
   - bioengineered cleaning rat
   - should be easy to kill but still scary
-
