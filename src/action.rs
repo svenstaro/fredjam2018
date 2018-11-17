@@ -1,5 +1,5 @@
 use crate::game_event::GameEventType;
-use crate::rooms::RoomType;
+use crate::room::RoomType;
 
 pub enum ActionHandled {
     Handled,

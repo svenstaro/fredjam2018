@@ -4,7 +4,6 @@ use self::sound::{AudioEvent, Effect, Track};
 use num::clamp;
 use std::collections::{HashMap, VecDeque};
 use std::io::{self, Write};
-use std::ops::Add;
 use std::sync::mpsc::channel;
 use std::thread;
 use std::time::Instant;
@@ -24,11 +23,11 @@ extern crate strum_macros;
 
 mod action;
 mod commands;
-mod enemy;
+mod entities;
 mod event;
 mod event_queue;
 mod game_event;
-mod player;
+mod room;
 mod rooms;
 mod sound;
 mod state;
@@ -37,13 +36,16 @@ mod utils;
 
 use crate::action::{Action, ActionHandled};
 use crate::commands::try_handle_command;
-use crate::enemy::Enemy;
 use crate::event::{Event, Events};
 use crate::event_queue::EventQueue;
 use crate::game_event::{GameEvent, GameEventType};
-use crate::rooms::{
-    adjacent_rooms, room_game_name, room_intro_text, CryobayRoom, Room, RoomType, SlushLobbyRoom,
+use crate::room::{
+    adjacent_rooms, room_game_name, room_intro_text, Room, RoomType
 };
+use crate::rooms::{
+    CryobayRoom, SlushLobbyRoom,
+};
+
 use crate::state::State;
 use crate::utils::{duration_to_msec_u64, BoxShape};
 

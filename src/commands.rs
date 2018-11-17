@@ -1,6 +1,6 @@
 use crate::action::Action;
 use crate::game_event::GameEventType;
-use crate::rooms::{adjacent_rooms, room_type_from_name};
+use crate::room::{adjacent_rooms, room_type_from_name};
 use crate::state::State;
 
 pub fn try_handle_command(tokens: String, state: &State) -> Vec<Action> {

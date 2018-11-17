@@ -1,6 +1,6 @@
 use std::fmt::Debug;
 
-use crate::rooms::RoomType;
+use crate::room::RoomType;
 use crate::state::State;
 use crate::timer::Timer;
 use crate::{Action, GameEventType};

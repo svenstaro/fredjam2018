@@ -1,8 +1,8 @@
 use std::collections::HashMap;
 
-use crate::enemy::Enemy;
-use crate::player::Player;
-use crate::rooms::RoomType;
+use crate::entities::enemy::Enemy;
+use crate::entities::player::Player;
+use crate::room::RoomType;
 
 #[derive(Debug)]
 pub struct State {
