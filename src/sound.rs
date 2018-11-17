@@ -1,11 +1,11 @@
-use std::io::Cursor;
-use rodio::{self, Sink};
-use std::sync::mpsc::Receiver;
 use rodio::dynamic_mixer::mixer;
 use rodio::source::Zero;
+use rodio::Decoder;
 use rodio::Sample;
 use rodio::Source;
-use rodio::Decoder;
+use rodio::{self, Sink};
+use std::io::Cursor;
+use std::sync::mpsc::Receiver;
 use std::time::Duration;
 use std::sync::{Mutex, Arc};
 
@@ -55,8 +55,7 @@ impl MusicPlayback {
     }
 }
 
-impl Source for MusicPlayback
-{
+impl Source for MusicPlayback {
     fn current_frame_len(&self) -> Option<usize> {
         self.inner_source.current_frame_len()
     }
@@ -74,8 +73,7 @@ impl Source for MusicPlayback
     }
 }
 
-impl Iterator for MusicPlayback
-{
+impl Iterator for MusicPlayback {
     type Item = i16;
 
     fn next(&mut self) -> Option<i16> {
@@ -88,7 +86,7 @@ impl AudioEvent {
         Cursor::new(self.data())
     }
 
-    fn data(&self) -> &'static[u8] {
+    fn data(&self) -> &'static [u8] {
         match self {
             AudioEvent::Effect(effect) => match effect {
                 Effect::BeepLong => &include_bytes!("../assets/wav/beep_long.wav")[..],
@@ -123,5 +121,4 @@ pub fn start(recv: Receiver<AudioEvent>) {
             }
         }
     }
-
 }

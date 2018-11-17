@@ -1,5 +1,5 @@
 use self::sound::{AudioEvent, Effect, Track};
-use std::collections::HashMap;
+use std::collections::{HashMap, VecDeque};
 use std::io::{self, Write};
 use std::sync::mpsc::channel;
 use std::thread;
@@ -16,9 +16,11 @@ use tui::Terminal;
 use unicode_width::UnicodeWidthStr;
 
 mod action;
+mod enemy;
 mod event;
 mod event_queue;
 mod game_event;
+mod player;
 mod rooms;
 mod sound;
 mod state;
@@ -27,16 +29,16 @@ mod utils;
 
 use crate::action::Action;
 use crate::event::{Event, Events};
-use crate::rooms::{SlushLobbyRoom, Room, RoomType, CryobayRoom};
 use crate::event_queue::EventQueue;
 use crate::game_event::{GameEvent, GameEventType};
+use crate::rooms::{room_intro_text, CryobayRoom, Room, RoomType, SlushLobbyRoom};
 use crate::state::State;
 use crate::utils::{duration_to_msec_u64, BoxShape};
 
 #[derive(Debug)]
 pub struct App {
     pub size: Rect,
-    pub log: Vec<GameEvent>,
+    pub log: VecDeque<GameEvent>,
     pub input: String,
     pub state: State,
     pub rooms: HashMap<RoomType, Box<Room>>,
@@ -47,7 +49,7 @@ impl App {
     fn new(state: State) -> Self {
         App {
             size: Default::default(),
-            log: vec![],
+            log: VecDeque::new(),
             input: "".into(),
             state: state,
             rooms: HashMap::new(),
@@ -85,8 +87,9 @@ fn main() -> Result<(), io::Error> {
     let mut app = App::new(state);
 
     app.rooms
-        .insert(RoomType::Cryobay, Box::new(CryobayRoom { lever: false }));
-    app.rooms.insert(RoomType::SlushLobby, Box::new(SlushLobbyRoom {}));
+        .insert(RoomType::Cryobay, Box::new(CryobayRoom::new()));
+    app.rooms
+        .insert(RoomType::SlushLobby, Box::new(SlushLobbyRoom::new()));
 
     app.event_queue
         .schedule_action(Action::Enter(RoomType::Cryobay));
@@ -100,6 +103,7 @@ fn main() -> Result<(), io::Error> {
             app.size = size;
         }
 
+        // Draw.
         terminal.draw(|mut f| {
             let h_chunks = Layout::default()
                 .direction(Direction::Horizontal)
@@ -182,7 +186,7 @@ fn main() -> Result<(), io::Error> {
                     let command = Action::Command(content.clone());
                     snd_send.send(AudioEvent::Track(Track::Intro));
                     content.push('\n');
-                    app.log.push(GameEvent {
+                    app.log.push_front(GameEvent {
                         content,
                         game_event_type: GameEventType::Normal,
                     });
@@ -215,15 +219,21 @@ fn main() -> Result<(), io::Error> {
             match next_action {
                 Action::Message(mut message, game_event_type) => {
                     message.push('\n');
-                    app.log.push(GameEvent {
+                    app.log.push_front(GameEvent {
                         content: message,
                         game_event_type,
                     })
                 }
+                Action::Enter(room) => {
+                    app.event_queue.schedule_action(Action::Message(
+                        String::from(room_intro_text(room)),
+                        GameEventType::Normal,
+                    ));
+                }
                 Action::Tick(dt) => {
                     app.event_queue.tick(dt);
                 }
-                _ => app.log.push(GameEvent {
+                _ => app.log.push_front(GameEvent {
                     content: String::from("Unhandled action!\n"),
                     game_event_type: GameEventType::Debug,
                 }),
