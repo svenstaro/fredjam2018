@@ -295,6 +295,7 @@ fn main() -> Result<(), io::Error> {
                         String::from(room_intro_text(room)),
                         GameEventType::Normal,
                     ));
+                    app.state.current_room = room;
                 }
                 Action::Command(tokens) => app.try_handle_command(tokens),
                 Action::EnemyAttack => {

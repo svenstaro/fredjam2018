@@ -15,11 +15,10 @@ pub fn try_handle_command(tokens: String, state: &State) -> Vec<Action> {
             let maybe_room_type = room_type_from_name(&room_name);
             match maybe_room_type {
                 Some(room_type) => {
-                    if (available_rooms.contains(&room_type)) {
-                        vec![Action::Leave(state.current_room),
+                    if available_rooms.contains(&room_type) {
+                        vec![
+                            Action::Leave(state.current_room),
                             Action::Enter(room_type),
-                             // for debugging
-                            // Action::Message(room_name, GameEventType::Debug),
                         ]
                     } else {
                         vec![Action::Message(String::from("You can't go to ") + &room_name + " from here.", GameEventType::Failure)]
