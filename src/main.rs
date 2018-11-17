@@ -176,12 +176,12 @@ fn main() -> Result<(), io::Error> {
                 log
             };
             Paragraph::new(styled_log.iter())
-                .block(Block::default().borders(Borders::ALL).title("Input"))
+                .block(Block::default().borders(Borders::ALL).title("Events"))
                 .wrap(true)
                 .render(&mut f, v_chunks_left[1]);
             Paragraph::new([Text::raw(&app.input)].iter())
                 .style(Style::default().fg(Color::Yellow))
-                .block(Block::default().borders(Borders::ALL).title("Events"))
+                .block(Block::default().borders(Borders::ALL).title("Input"))
                 .render(&mut f, v_chunks_left[0]);
             Canvas::default()
                 .block(Block::default().borders(Borders::ALL).title("Map"))
@@ -299,6 +299,7 @@ fn main() -> Result<(), io::Error> {
                     ));
                     app.state.current_room = room;
                 }
+                Action::Leave(_) => {}
                 Action::Command(tokens) => app.try_handle_command(tokens),
                 Action::EnemyAttack => {
                     if let Some(ref enemy) = app.state.enemy {
