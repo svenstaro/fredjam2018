@@ -13,13 +13,13 @@ use strum::IntoEnumIterator;
 
 static FADE_SAMPLES: u32 = 44_100;
 
-#[derive(Clone, Copy, PartialEq, Eq, Debug)]
+#[derive(Clone, Copy, PartialEq, Eq, Debug, Hash)]
 pub enum AudioEvent {
     Effect(Effect),
     Track(Track),
 }
 
-#[derive(Clone, Copy, PartialEq, Eq, Debug)]
+#[derive(Clone, Copy, PartialEq, Eq, Debug, Hash)]
 pub enum Effect {
     BeepLong,
 }
@@ -51,7 +51,7 @@ impl MusicPlaybackController {
 
 impl MusicPlayback {
     fn create() -> (Self, MusicPlaybackController) {
-        let track = Arc::new(Mutex::new(Track::Compliactions));
+        let track = Arc::new(Mutex::new(Track::Intro));
         let mut cursors = HashMap::new();
         for track in Track::iter() {
             cursors.insert(
@@ -65,7 +65,7 @@ impl MusicPlayback {
             MusicPlayback {
                 track: track.clone(),
                 data_cursors: cursors,
-                current_track: Track::Compliactions,
+                current_track: Track::Intro,
                 last_track: None,
                 samples_since_check: 0,
                 samples_since_switch: 0,

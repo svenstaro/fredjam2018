@@ -1,5 +1,6 @@
 use crate::game_event::GameEventType;
 use crate::room::RoomType;
+use crate::sound::AudioEvent;
 
 pub enum ActionHandled {
     Handled,
@@ -10,10 +11,8 @@ pub enum ActionHandled {
 pub enum Action {
     // Do nothing.
     Nop,
-    // String is room name.
     Enter(RoomType),
     Tick(u64),
-    // String is room name.
     Leave(RoomType),
     Message(String, GameEventType),
     Command(String),
@@ -25,4 +24,7 @@ pub enum Action {
 
     // Enemy attack
     EnemyAttack,
+
+    // Audio things
+    Audio(AudioEvent),
 }

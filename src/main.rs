@@ -316,7 +316,9 @@ fn main() -> Result<(), io::Error> {
                         app.log.push_front(GameEvent {
                             content: format!(
                                 "{:?} attacks you! You lose {} HP, you now have {} HP\n",
-                                enemy.get_enemy_type(), enemy.get_attack_strength(), app.state.player.health,
+                                enemy.get_enemy_type(),
+                                enemy.get_attack_strength(),
+                                app.state.player.health,
                             ),
                             game_event_type: GameEventType::Combat,
                         });
@@ -327,6 +329,9 @@ fn main() -> Result<(), io::Error> {
                         }
                     }
                 }
+                Action::Audio(action) => {
+                    snd_send.send(action);
+                }
                 Action::Attack => {
                     let damage = app.state.player.attack_strength;
                     let mut enemy_option = app.state.get_current_enemy_mut(app.state.current_room);
@@ -336,18 +341,19 @@ fn main() -> Result<(), io::Error> {
                             if enemy.get_health() <= 0 {
                                 app.state.enemies.remove(&app.state.current_room);
                                 app.event_queue.schedule_action(Action::Message(
-                                        String::from("The enemy has been slain."),
-                                        GameEventType::Failure,
-                                        ));
-                                app.event_queue.emplace_timers(TimerType::EnemyAttack, vec![]);
+                                    String::from("The enemy has been slain."),
+                                    GameEventType::Failure,
+                                ));
+                                app.event_queue
+                                    .emplace_timers(TimerType::EnemyAttack, vec![]);
                             }
                         }
                         None => {
                             app.event_queue.schedule_action(Action::Message(
-                                    String::from("There is nothing you can attack."),
-                                    GameEventType::Failure,
-                                    ));
-                        },
+                                String::from("There is nothing you can attack."),
+                                GameEventType::Failure,
+                            ));
+                        }
                     };
                 }
                 Action::PlayerDied => {
@@ -358,6 +364,21 @@ fn main() -> Result<(), io::Error> {
                 }
                 Action::Dodge => {
                     let mut attack_timers = app.event_queue.get_timers(TimerType::EnemyAttack);
+                    if attack_timers.is_empty() {
+                        if app.state.enemies.get(&app.state.current_room).is_some() {
+                            app.event_queue.schedule_action(Action::Message(
+                                String::from("You dodge the attack. The enemy calmly analyses your movements."),
+                                GameEventType::Failure,
+                            ));
+                            break;
+                        }
+                        app.event_queue.schedule_action(Action::Message(
+                            String::from("You dodge the attack of your own paranoia..."),
+                            GameEventType::Failure,
+                        ));
+                        break;
+                    }
+
                     for elem in attack_timers.iter_mut() {
                         elem.elapsed = 0;
                     }

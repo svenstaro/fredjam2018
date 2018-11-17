@@ -12,6 +12,9 @@ pub trait Room: Debug {
         event_queue: &mut EventQueue,
         action: &Action,
     ) -> ActionHandled;
+
+    fn visit(&mut self);
+    fn is_visited(&self) -> bool;
 }
 
 #[derive(Debug, PartialEq, Eq, Hash, Clone, Copy)]
@@ -31,17 +34,30 @@ pub fn room_game_name(room_type: RoomType) -> &'static str {
     }
 }
 
-pub fn room_intro_text(room_type: RoomType) -> &'static str {
+pub fn room_intro_text(room_type: RoomType) -> (&'static str, &'static str) {
     match room_type {
-        RoomType::Cryobay => include_str!("../assets/rooms/cryobay_enter.txt"),
-        RoomType::SlushLobby => include_str!("../assets/rooms/slush_lobby_enter.txt"),
-        RoomType::Cryocontrol => include_str!("../assets/rooms/cryocontrol_enter.txt"),
-        RoomType::Corridor => include_str!("../assets/rooms/corridor_enter.txt"),
+        RoomType::Cryobay => (
+            include_str!("../assets/rooms/cryobay_enter.txt"),
+            include_str!("../assets/rooms/cryobay_enter_first.txt"),
+        ),
+        RoomType::SlushLobby => (
+            include_str!("../assets/rooms/slush_lobby_enter.txt"),
+            include_str!("../assets/rooms/slush_lobby_enter_first.txt"),
+        ),
+        RoomType::Cryocontrol => (
+            include_str!("../assets/rooms/cryocontrol_enter.txt"),
+            include_str!("../assets/rooms/cryocontrol_enter_first.txt"),
+        ),
+        RoomType::Corridor => (
+            include_str!("../assets/rooms/corridor_enter.txt"),
+            include_str!("../assets/rooms/corridor_enter_first.txt"),
+        ),
     }
 }
 
-pub fn reading_time_msecs(room_type: RoomType) -> u64 {
-    let msg = room_intro_text(room_type);
+pub fn reading_time_msecs(room_type: RoomType, has_visited: bool) -> u64 {
+    let intros = room_intro_text(room_type);
+    let msg = if has_visited { intros.0 } else { intros.1 };
     // 0.05 of a second for every character, times 1000 to convert to msecs
     (msg.len() as f64 * 0.05 * 1000.0).floor() as u64
 }
@@ -67,9 +83,10 @@ pub fn room_type_from_name(room_name: &str) -> Option<RoomType> {
 
 pub fn enter_room(app: &mut App, room_type: RoomType) {
     let enemy_option = app.state.get_current_enemy(room_type);
+    let has_visited = app.rooms.get(&room_type).unwrap().is_visited();
     match enemy_option {
         Some(enemy) => {
-            let timers = enemy.get_initial_attack_timers(reading_time_msecs(room_type));
+            let timers = enemy.get_initial_attack_timers(reading_time_msecs(room_type, has_visited));
             app.event_queue.schedule_timers(timers);
         }
         None => (),
@@ -84,8 +101,16 @@ pub fn enter_room(app: &mut App, room_type: RoomType) {
         door_msg += room_game_name(room);
         door_msg += "\n";
     }
-    app.event_queue.schedule_action(Action::Message(
-        String::from(room_intro_text(room_type).to_owned() + &door_msg),
-        GameEventType::Normal,
-    ));
+    if has_visited {
+        app.event_queue.schedule_action(Action::Message(
+            String::from(room_intro_text(room_type).0.to_owned() + &door_msg),
+            GameEventType::Normal,
+        ));
+    } else {
+        app.event_queue.schedule_action(Action::Message(
+            String::from(room_intro_text(room_type).1.to_owned() + &door_msg),
+            GameEventType::Normal,
+        ));
+    }
+    app.rooms.get_mut(&room_type).unwrap().visit();
 }
