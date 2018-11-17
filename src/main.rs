@@ -1,4 +1,7 @@
+extern crate num;
+
 use self::sound::{AudioEvent, Effect, Track};
+use num::clamp;
 use std::collections::{HashMap, VecDeque};
 use std::io::{self, Write};
 use std::sync::mpsc::channel;
@@ -11,7 +14,7 @@ use tui::backend::TermionBackend;
 use tui::layout::{Constraint, Direction, Layout, Rect};
 use tui::style::{Color, Style};
 use tui::widgets::canvas::Canvas;
-use tui::widgets::{Block, Borders, Paragraph, Text, Widget};
+use tui::widgets::{Block, Borders, Gauge, Paragraph, Text, Widget};
 use tui::Terminal;
 use unicode_width::UnicodeWidthStr;
 #[macro_use]
@@ -28,22 +31,31 @@ mod sound;
 mod state;
 mod timer;
 mod utils;
+mod commands;
 
-use crate::action::Action;
+use crate::action::{Action, ActionHandled};
 use crate::event::{Event, Events};
 use crate::event_queue::EventQueue;
 use crate::game_event::{GameEvent, GameEventType};
 use crate::rooms::{room_intro_text, CryobayRoom, Room, RoomType, SlushLobbyRoom};
 use crate::state::State;
+use crate::timer::Timer;
 use crate::utils::{duration_to_msec_u64, BoxShape};
+use crate::commands::{try_handle_command};
 
 #[derive(Debug)]
 pub struct App {
+    // The size of the console window.
     pub size: Rect,
+    // The system event, like rendering stuff in the console.
     pub log: VecDeque<GameEvent>,
+    // The input in the command box.
     pub input: String,
+    // The global game state.
     pub state: State,
+    // The list of rooms.
     pub rooms: HashMap<RoomType, Box<Room>>,
+    // The action event queue.
     pub event_queue: EventQueue,
 }
 
@@ -51,24 +63,31 @@ impl App {
     fn new(state: State) -> Self {
         App {
             size: Default::default(),
-            log: VecDeque::new(),
+            log: Default::default(),
             input: "".into(),
             state: state,
-            rooms: HashMap::new(),
+            rooms: Default::default(),
             event_queue: Default::default(),
         }
     }
 
     // Return value indicates redraw required.
-    pub fn try_handle_room_action(&mut self, action: &Action) -> bool {
+    pub fn try_handle_room_action(&mut self, action: &Action) -> ActionHandled {
         // Try handling the action in a room, if that succeeds, then return true.
         for (_, ref mut room) in &mut self.rooms {
-            let handled = room.handle_action(&mut self.state, &mut self.event_queue, action);
-            if handled {
-                return true;
+            match room.handle_action(&mut self.state, &mut self.event_queue, action) {
+                ActionHandled::Handled => return ActionHandled::Handled,
+                _ => (),
             }
         }
-        false
+
+        ActionHandled::NotHandled
+    }
+
+    pub fn try_handle_command(&mut self, tokens: String) -> () {
+        for action in try_handle_command(tokens, &self.state) {
+            self.event_queue.schedule_action(action);
+        }
     }
 }
 
@@ -96,6 +115,15 @@ fn main() -> Result<(), io::Error> {
     app.event_queue
         .schedule_action(Action::Enter(RoomType::Cryobay));
 
+    // app.event_queue
+    //     .schedule_timer(Timer::new("example", 0, 10000, Default::default()));
+    // app.event_queue
+    //     .schedule_timer(Timer::new("empty 10000", 0, 10000, Default::default()));
+    // app.event_queue
+    //     .schedule_timer(Timer::new("empty 6000", 0, 6000, Default::default()));
+    // app.event_queue
+    //     .schedule_timer(Timer::new("full 8000", 8000, 8000, Default::default()));
+
     let mut now = Instant::now();
 
     loop {
@@ -108,6 +136,7 @@ fn main() -> Result<(), io::Error> {
         // Draw.
         terminal.draw(|mut f| {
             let h_chunks = Layout::default()
+                // Split along the horizontal axis.
                 .direction(Direction::Horizontal)
                 .margin(1)
                 .constraints([Constraint::Percentage(70), Constraint::Percentage(30)].as_ref())
@@ -120,6 +149,20 @@ fn main() -> Result<(), io::Error> {
                 .direction(Direction::Vertical)
                 .constraints([Constraint::Percentage(30), Constraint::Percentage(70)].as_ref())
                 .split(h_chunks[1]);
+            let v_chunks_right_up = Layout::default()
+                .direction(Direction::Vertical)
+                .constraints(
+                    [
+                        Constraint::Max(3),
+                        Constraint::Max(3),
+                        Constraint::Max(3),
+                        Constraint::Max(3),
+                        Constraint::Max(3),
+                        Constraint::Max(0),
+                    ]
+                    .as_ref(),
+                )
+                .split(v_chunks_right[0]);
             let styled_log = {
                 let mut log = vec![];
                 for game_event in &app.log {
@@ -173,6 +216,23 @@ fn main() -> Result<(), io::Error> {
                 .x_bounds([0.0, 100.0])
                 .y_bounds([0.0, 100.0])
                 .render(&mut f, v_chunks_right[1]);
+            for (index, timer) in app.event_queue.timers.iter().enumerate() {
+                // Only render the first 5 timers.
+                if index > 4 {
+                    break;
+                }
+                let int_progress = clamp(
+                    (timer.duration as i64 - timer.elapsed as i64) * 100i64 / timer.duration as i64,
+                    0,
+                    100,
+                ) as u16;
+                Gauge::default()
+                    .block(Block::default().title(&timer.label).borders(Borders::ALL))
+                    .style(Style::default().fg(Color::Magenta).bg(Color::Green))
+                    .percent(int_progress)
+                    .label(&format!("Gauge label {}/100", int_progress))
+                    .render(&mut f, v_chunks_right_up[index]);
+            }
         })?;
 
         write!(
@@ -190,15 +250,17 @@ fn main() -> Result<(), io::Error> {
                     break;
                 }
                 Key::Char('\n') => {
-                    let mut content: String = app.input.drain(..).collect();
-                    let command = Action::Command(content.clone());
-                    snd_send.send(AudioEvent::Track(Track::Intro));
-                    content.push('\n');
-                    app.log.push_front(GameEvent {
-                        content,
-                        game_event_type: GameEventType::Normal,
-                    });
-                    app.event_queue.schedule_action(command);
+                    if !app.input.is_empty() {
+                        let mut content: String = app.input.drain(..).collect();
+                        let command = Action::Command(content.clone());
+                        snd_send.send(AudioEvent::Track(Track::Intro));
+                        content.push('\n');
+                        app.log.push_front(GameEvent {
+                            content,
+                            game_event_type: GameEventType::Normal,
+                        });
+                        app.event_queue.schedule_action(command);
+                    }
                 }
                 Key::Char(c) => {
                     snd_send.send(AudioEvent::Effect(Effect::BeepLong));
@@ -218,9 +280,9 @@ fn main() -> Result<(), io::Error> {
         // Handle game actions here (Timers).
         while !app.event_queue.is_empty() {
             let next_action = app.event_queue.get_next_action().unwrap();
-            let handled = app.try_handle_room_action(&next_action);
-            if handled {
-                break;
+            match app.try_handle_room_action(&next_action) {
+                ActionHandled::Handled => break,
+                _ => (),
             }
 
             // Handle system and global actions here.
@@ -234,10 +296,12 @@ fn main() -> Result<(), io::Error> {
                 }
                 Action::Enter(room) => {
                     app.event_queue.schedule_action(Action::Message(
-                        String::from(room_intro_text(room)),
+                        String::from(room_intro_text(room).to_owned() + "\n"),
                         GameEventType::Normal,
                     ));
+                    app.state.current_room = room;
                 }
+                Action::Command(tokens) => app.try_handle_command(tokens),
                 Action::EnemyAttack => {
                     if let Some(ref enemy) = app.state.enemy {
                         app.state.player.health -= enemy.get_attack_strength();
@@ -248,11 +312,10 @@ fn main() -> Result<(), io::Error> {
                 }
                 Action::PlayerDied => {
                     app.event_queue.schedule_action(Action::Message(
-                            String::from("You died."),
-                            GameEventType::Failure,
-                            ));
+                        String::from("You died."),
+                        GameEventType::Failure,
+                    ));
                 }
-
 
                 Action::Tick(dt) => {
                     app.event_queue.tick(dt);
