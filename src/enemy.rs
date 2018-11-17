@@ -19,7 +19,7 @@ pub trait Enemy: Debug {
 
     fn get_attack_strength(&self) -> i32;
 
-    fn get_attack_timer(&self) -> Timer;
+    fn get_attack_timers(&self) -> Vec<Timer>;
 }
 
 #[derive(Debug)]
@@ -68,31 +68,28 @@ impl Enemy for GenericEnemy {
         self.attack_strength
     }
 
-    fn get_attack_timer(&self) -> Timer {
-        Timer::new(
-            &format!("{:?} attack timer", self.enemy_type),
-            0,
-            self.timer_length,
-            Action::Message(
-                String::from(format!(
-                    "The {:?} is preparing to attack you.",
-                    self.enemy_type
-                )),
-                GameEventType::Success,
+    fn get_attack_timers(&self) -> Vec<Timer> {
+        vec![
+            Timer::new(
+                // Unused, because invisible.
+                &format!("{:?} attack notification timer", self.enemy_type),
+                0,
+                self.timer_length - self.timer_length / 10,
+                Action::Message(
+                    String::from(format!("The {:?}'s attack is imminent.", self.enemy_type)),
+                    GameEventType::Combat,
+                ),
+                // Should not be visible as a progressbar.
+                false,
             ),
-            true,
-        )
-        //
-        // Timer::new(
-        //     &format!("{:?} attack timer", self.enemy_type),
-        //     0,
-        //     self.timer_length,
-        //     Action::Message(
-        //         String::from(format!("The {:?}'s attack is imminent", self.enemy_type)),
-        //         GameEventType::Success,
-        //     ),
-        //     true,
-        // )
+            Timer::new(
+                &String::from(format!("The {:?} is preparing to attack you.", self.enemy_type)),
+                0,
+                self.timer_length,
+                Action::EnemyAttack,
+                true,
+            )
+        ]
     }
 }
 
