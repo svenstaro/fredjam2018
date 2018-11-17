@@ -12,7 +12,7 @@ use tui::backend::TermionBackend;
 use tui::layout::{Constraint, Direction, Layout, Rect};
 use tui::style::{Color, Style};
 use tui::widgets::canvas::Canvas;
-use tui::widgets::{Block, Borders, Paragraph, Text, Widget};
+use tui::widgets::{Gauge, Block, Borders, Paragraph, Text, Widget};
 use tui::Terminal;
 use unicode_width::UnicodeWidthStr;
 
@@ -112,6 +112,7 @@ fn main() -> Result<(), io::Error> {
 
         terminal.draw(|mut f| {
             let h_chunks = Layout::default()
+                // Split along the horizontal axis.
                 .direction(Direction::Horizontal)
                 .margin(1)
                 .constraints([Constraint::Percentage(70), Constraint::Percentage(30)].as_ref())
@@ -171,6 +172,14 @@ fn main() -> Result<(), io::Error> {
                 .x_bounds([0.0, 100.0])
                 .y_bounds([0.0, 100.0])
                 .render(&mut f, v_chunks_right[1]);
+            for timer in &app.event_queue.timers {
+                 Gauge::default()
+                    .block(Block::default().title("TODO label").borders(Borders::ALL))
+                    .style(Style::default().fg(Color::Magenta).bg(Color::Green))
+                    .percent(50)
+                    .label(&format!("Gauge label {}/100", 50))
+                    .render(&mut f, v_chunks_right[0]);
+            }
         })?;
 
         write!(
