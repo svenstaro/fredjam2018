@@ -24,11 +24,11 @@ pub enum Effect {
 #[derive(Clone, Copy, PartialEq, Eq, Debug, EnumIter, Hash)]
 pub enum Track {
     Intro,
+    Compliactions,
 }
 
 struct MusicPlayback {
     track: Arc<Mutex<Track>>,
-    inner_source: Box<Source<Item = i16> + Send>,
     data_cursors: HashMap<Track, Decoder<Cursor<&'static [u8]>>>,
     current_cursor: Track,
     samples_since_check: u64,
@@ -41,8 +41,6 @@ struct MusicPlaybackController {
 impl MusicPlaybackController {
     fn set_track(&mut self, track: Track) {
         *self.track.lock().unwrap() = track;
-        // let audio = AudioEvent::Track(track);
-        // self.inner_source = Box::new(Decoder::new(audio.data_cursor()).unwrap().repeat_infinite())
     }
 }
 
@@ -59,7 +57,6 @@ impl MusicPlayback {
         (
             MusicPlayback {
                 track: track.clone(),
-                inner_source: Box::new(Zero::new(2, 44800)),
                 data_cursors: cursors,
                 current_cursor: Track::Intro,
                 samples_since_check: 0,
@@ -116,6 +113,7 @@ impl AudioEvent {
             },
             AudioEvent::Track(track) => match track {
                 Track::Intro => &include_bytes!("../assets/music/intro.mp3")[..],
+                Track::Compliactions => &include_bytes!("../assets/music/complications.mp3")[..],
             },
         }
     }
