@@ -1,5 +1,9 @@
+use self::sound::{AudioEvent, Effect};
 use std::collections::HashMap;
+use std::time::Instant;
 use std::io::{self, Write};
+use std::sync::mpsc::channel;
+use std::thread;
 use termion::cursor::Goto;
 use termion::event::Key;
 use termion::raw::IntoRawMode;
@@ -10,26 +14,24 @@ use tui::widgets::canvas::Canvas;
 use tui::widgets::{Block, Borders, Paragraph, Text, Widget};
 use tui::Terminal;
 use unicode_width::UnicodeWidthStr;
-use std::thread;
-use std::sync::mpsc::channel;
-use self::sound::{AudioEvent, Effect};
 
 mod action;
-mod state;
 mod event;
-mod sound;
-mod rooms;
-mod utils;
-mod game_event;
 mod event_queue;
+mod game_event;
+mod rooms;
+mod sound;
+mod state;
+mod timer;
+mod utils;
 
 use crate::action::Action;
-use crate::state::State;
-use crate::game_event::{GameEvent, GameEventType};
-use crate::event_queue::EventQueue;
 use crate::event::{Event, Events};
+use crate::event_queue::EventQueue;
+use crate::game_event::{GameEvent, GameEventType};
 use crate::rooms::{LockedRoom, Room, RoomType, WakeUpRoom};
-use crate::utils::BoxShape;
+use crate::state::State;
+use crate::utils::{duration_to_msec_u64, BoxShape};
 
 #[derive(Debug)]
 pub struct App {
@@ -89,6 +91,8 @@ fn main() -> Result<(), io::Error> {
     app.event_queue
         .schedule_action(Action::Enter(RoomType::WakeUp));
 
+    let mut now = Instant::now();
+
     loop {
         let size = terminal.size()?;
         if size != app.size {
@@ -102,10 +106,14 @@ fn main() -> Result<(), io::Error> {
                 .margin(1)
                 .constraints([Constraint::Percentage(70), Constraint::Percentage(30)].as_ref())
                 .split(size);
-            let v_chunks = Layout::default()
+            let v_chunks_left = Layout::default()
                 .direction(Direction::Vertical)
                 .constraints([Constraint::Length(3), Constraint::Min(1)].as_ref())
                 .split(h_chunks[0]);
+            let v_chunks_right = Layout::default()
+                .direction(Direction::Vertical)
+                .constraints([Constraint::Percentage(30), Constraint::Percentage(70)].as_ref())
+                .split(h_chunks[1]);
             let styled_log = {
                 let mut log = vec![];
                 for game_event in &app.log {
@@ -123,11 +131,11 @@ fn main() -> Result<(), io::Error> {
             Paragraph::new(styled_log.iter())
                 .block(Block::default().borders(Borders::ALL).title("Input"))
                 .wrap(true)
-                .render(&mut f, v_chunks[1]);
+                .render(&mut f, v_chunks_left[1]);
             Paragraph::new([Text::raw(&app.input)].iter())
                 .style(Style::default().fg(Color::Yellow))
                 .block(Block::default().borders(Borders::ALL).title("Events"))
-                .render(&mut f, v_chunks[0]);
+                .render(&mut f, v_chunks_left[0]);
             Canvas::default()
                 .block(Block::default().borders(Borders::ALL).title("Map"))
                 .paint(|ctx| {
@@ -152,7 +160,7 @@ fn main() -> Result<(), io::Error> {
                 })
                 .x_bounds([0.0, 100.0])
                 .y_bounds([0.0, 100.0])
-                .render(&mut f, h_chunks[1]);
+                .render(&mut f, v_chunks_right[1]);
         })?;
 
         write!(
@@ -189,8 +197,8 @@ fn main() -> Result<(), io::Error> {
                 _ => {}
             },
             event::Event::Tick => {
-                // TODO dt how?
-                app.event_queue.schedule_action(Action::Tick(0));
+                let elapsed = duration_to_msec_u64(&now.elapsed());
+                app.event_queue.schedule_action(Action::Tick(elapsed));
             }
         }
 
@@ -211,7 +219,9 @@ fn main() -> Result<(), io::Error> {
                         game_event_type,
                     })
                 }
-                Action::Tick(_dt) => {}
+                Action::Tick(dt) => {
+                    app.event_queue.tick(dt);
+                }
                 _ => app.log.push(GameEvent {
                     content: String::from("Unhandled action!\n"),
                     game_event_type: GameEventType::Debug,
@@ -219,8 +229,7 @@ fn main() -> Result<(), io::Error> {
             }
         }
 
-        // Uncomment to print stuff in each iteration.
-        // app.log.push(GameEvent { content: String::from("ASDASD"), game_event_type: GameEventType::Combat })
+        now = Instant::now();
     }
     Ok(())
 }

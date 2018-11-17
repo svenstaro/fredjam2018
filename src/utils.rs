@@ -1,7 +1,12 @@
 use itertools::Itertools;
+use std::time::Duration;
 use tui::layout::Rect;
 use tui::style::Color;
 use tui::widgets::canvas::{Line, Shape};
+
+pub fn duration_to_msec_u64(duration: &Duration) -> u64 {
+    duration.as_secs() * 1000 + duration.subsec_millis() as u64
+}
 
 pub struct BoxShape {
     pub rect: Rect,

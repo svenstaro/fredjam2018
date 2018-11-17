@@ -6,7 +6,7 @@ use crate::game_event::GameEventType;
 pub enum Action {
     // String is room name.
     Enter(RoomType),
-    Tick(u32),
+    Tick(u64),
     // String is room name.
     Leave(RoomType),
     Message(String, GameEventType),
