@@ -261,11 +261,12 @@ fn main() -> Result<(), io::Error> {
                 Key::Char('\n') => {
                     if !app.input.is_empty() {
                         let mut content: String = app.input.drain(..).collect();
+                        content = format!(">>> {}", content);
                         let command = Action::Command(content.clone());
                         snd_send.send(AudioEvent::Track(Track::Intro));
-                        content.push('\n');
+                        content.push_str("\n");
                         app.log.push_front(GameEvent {
-                            content,
+                            content: content,
                             game_event_type: GameEventType::Normal,
                         });
                         app.event_queue.schedule_action(command);
