@@ -140,7 +140,7 @@ pub fn initialize_enemies(state: &mut State) {
     let rat_enemy_attack_messages = vec![];
 
     let rat = GenericEnemy::new(EnemyType::Rat, 5, 1, 5 * 1000, rat_attack_messages, rat_enemy_attack_messages);
-    state.enemies.insert(RoomType::SlushLobby, Box::new(rat));
+    state.enemies.insert(RoomType::Cryocontrol, Box::new(rat));
 
 
     let roomba_attack_messages = vec!["".into()];
