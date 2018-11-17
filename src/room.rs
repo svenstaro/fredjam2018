@@ -44,7 +44,7 @@ pub fn adjacent_rooms(room_type: RoomType) -> Vec<RoomType> {
     match room_type {
         RoomType::Cryobay => vec![RoomType::SlushLobby],
         RoomType::SlushLobby => vec![RoomType::Cryobay, RoomType::Cryocontrol],
-        RoomType::Cryocontrol => vec![RoomType::SlushLobby],
+        RoomType::Cryocontrol => vec![RoomType::SlushLobby, RoomType::Corridor],
         RoomType::Corridor => vec![RoomType::Cryocontrol],
     }
 }
