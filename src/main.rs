@@ -1,7 +1,3 @@
-extern crate termion;
-extern crate tui;
-extern crate unicode_width;
-
 use std::io::{self, Write};
 use termion::cursor::Goto;
 use termion::event::Key;
@@ -15,7 +11,7 @@ use unicode_width::UnicodeWidthStr;
 
 mod event;
 
-use self::event::{Event, Events};
+use crate::event::{Event, Events};
 
 #[derive(Debug)]
 pub enum GameEventType {
@@ -82,8 +78,6 @@ fn main() -> Result<(), io::Error> {
     let stdout = io::stdout().into_raw_mode()?;
     let backend = TermionBackend::new(stdout);
     let mut terminal = Terminal::new(backend)?;
-    let size = terminal.size()?;
-    // terminal.hide_cursor()?;
 
     let events = Events::new();
     let mut app: App = Default::default();
@@ -141,7 +135,7 @@ fn main() -> Result<(), io::Error> {
         // Handle system events.
         match events.next().unwrap() {
             Event::Input(input) => match input {
-                Key::Char('q') => {
+                Key::Esc => {
                     break;
                 }
                 Key::Char('\n') => {
