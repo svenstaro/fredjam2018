@@ -1,5 +1,5 @@
 use rodio::dynamic_mixer::mixer;
-use rodio::source::Zero;
+use rodio::source::{Zero, Repeat};
 use rodio::Decoder;
 use rodio::Source;
 use rodio::{self, Sink};
@@ -29,7 +29,7 @@ pub enum Track {
 
 struct MusicPlayback {
     track: Arc<Mutex<Track>>,
-    data_cursors: HashMap<Track, Decoder<Cursor<&'static [u8]>>>,
+    data_cursors: HashMap<Track, Repeat<Decoder<Cursor<&'static [u8]>>>>,
     current_cursor: Track,
     samples_since_check: u64,
 }
@@ -51,7 +51,7 @@ impl MusicPlayback {
         for track in Track::iter() {
             cursors.insert(
                 track,
-                rodio::Decoder::new(AudioEvent::Track(track).data_cursor()).unwrap(),
+                rodio::Decoder::new(AudioEvent::Track(track).data_cursor()).unwrap().repeat_infinite(),
             );
         }
         (
