@@ -1,5 +1,5 @@
-use std::collections::HashMap;
 use crate::action::Action;
+use std::collections::HashMap;
 
 #[derive(Debug)]
 pub struct Timer {

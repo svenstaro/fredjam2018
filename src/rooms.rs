@@ -1,6 +1,6 @@
-use std::fmt::Debug;
 use crate::EventQueue;
 use crate::{Action, GameEventType, State};
+use std::fmt::Debug;
 
 pub trait Room: Debug {
     fn handle_action(
@@ -21,6 +21,12 @@ pub enum RoomType {
 #[derive(Debug)]
 pub struct CryobayRoom {
     pub lever: bool,
+}
+
+impl CryobayRoom {
+    pub fn new() -> CryobayRoom {
+        CryobayRoom {lever: false}
+    }
 }
 
 impl Room for CryobayRoom {
@@ -89,6 +95,12 @@ impl Room for CryobayRoom {
 // Second room room, locked per default, lever needs to be pulled.
 #[derive(Debug)]
 pub struct SlushLobbyRoom;
+
+impl SlushLobbyRoom {
+    pub fn new() -> SlushLobbyRoom {
+        SlushLobbyRoom {}
+    }
+}
 
 impl Room for SlushLobbyRoom {
     fn handle_action(

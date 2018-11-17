@@ -16,9 +16,11 @@ use tui::Terminal;
 use unicode_width::UnicodeWidthStr;
 
 mod action;
+mod enemy;
 mod event;
 mod event_queue;
 mod game_event;
+mod player;
 mod rooms;
 mod sound;
 mod state;
@@ -85,9 +87,9 @@ fn main() -> Result<(), io::Error> {
     let mut app = App::new(state);
 
     app.rooms
-        .insert(RoomType::Cryobay, Box::new(CryobayRoom { lever: false }));
+        .insert(RoomType::Cryobay, Box::new(CryobayRoom::new()));
     app.rooms
-        .insert(RoomType::SlushLobby, Box::new(SlushLobbyRoom {}));
+        .insert(RoomType::SlushLobby, Box::new(SlushLobbyRoom::new()));
 
     app.event_queue
         .schedule_action(Action::Enter(RoomType::Cryobay));
