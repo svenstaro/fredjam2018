@@ -11,7 +11,7 @@ pub trait Room: Debug {
     ) -> bool;
 }
 
-#[derive(Debug, PartialEq, Eq, Hash)]
+#[derive(Debug, PartialEq, Eq, Hash, Clone, Copy)]
 pub enum RoomType {
     Cryobay,
     SlushLobby,
@@ -135,5 +135,14 @@ pub fn adjacent_rooms(room_type: RoomType) -> Vec<RoomType> {
         RoomType::Cryobay => vec![RoomType::SlushLobby],
         RoomType::SlushLobby => vec![RoomType::Cryobay, RoomType::Cryocontrol],
         RoomType::Cryocontrol => vec![RoomType::SlushLobby]
+    }
+}
+
+pub fn room_type_from_name(room_name: &str) -> Option<RoomType> {
+    match room_name {
+        "cryobay" => Some(RoomType::Cryobay),
+        "slush lobby" => Some(RoomType::SlushLobby),
+        "cryocontrol" => Some(RoomType::Cryocontrol),
+        _ => None
     }
 }

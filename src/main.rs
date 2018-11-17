@@ -27,6 +27,7 @@ mod sound;
 mod state;
 mod timer;
 mod utils;
+mod commands;
 
 use crate::action::Action;
 use crate::event::{Event, Events};
@@ -35,6 +36,7 @@ use crate::game_event::{GameEvent, GameEventType};
 use crate::rooms::{room_intro_text, CryobayRoom, Room, RoomType, SlushLobbyRoom};
 use crate::state::State;
 use crate::utils::{duration_to_msec_u64, BoxShape};
+use crate::commands::{try_handle_command};
 
 #[derive(Debug)]
 pub struct App {
@@ -68,6 +70,12 @@ impl App {
             }
         }
         false
+    }
+
+    pub fn try_handle_command(&mut self, tokens: String) -> () {
+        for action in try_handle_command(tokens, &self.state) {
+            self.event_queue.schedule_action(action);
+        }
     }
 }
 
@@ -230,6 +238,7 @@ fn main() -> Result<(), io::Error> {
                         GameEventType::Normal,
                     ));
                 }
+                Action::Command(tokens) => app.try_handle_command(tokens),
                 Action::Tick(dt) => {
                     app.event_queue.tick(dt);
                 }
