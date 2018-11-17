@@ -1,7 +1,7 @@
 use itertools::Itertools;
 use tui::layout::Rect;
 use tui::style::Color;
-use tui::widgets::canvas::{Shape, Line};
+use tui::widgets::canvas::{Line, Shape};
 
 pub struct BoxShape {
     pub rect: Rect,
@@ -51,4 +51,3 @@ impl<'a> Shape<'a> for BoxShape {
         )
     }
 }
-
