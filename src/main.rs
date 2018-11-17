@@ -264,7 +264,7 @@ fn main() -> Result<(), io::Error> {
                         content = format!(">>> {}", content);
                         let command = Action::Command(content.clone());
                         snd_send.send(AudioEvent::Track(Track::Intro));
-                        content.push_str("\n");
+                        content.push_str("\n\n");
                         app.log.push_front(GameEvent {
                             content: content,
                             game_event_type: GameEventType::Normal,
