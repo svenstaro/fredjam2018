@@ -19,8 +19,8 @@ pub enum Action {
     Command(String),
 
     // Player
-    Attack(String),
-    Dodge(String),
+    Attack,
+    Dodge,
     PlayerDied,
 
     // Enemy attack

@@ -2,7 +2,7 @@ use std::fmt::Debug;
 
 use crate::room::RoomType;
 use crate::state::State;
-use crate::timer::Timer;
+use crate::timer::{Timer, TimerType};
 use crate::{Action, GameEventType};
 
 #[derive(Debug, Copy, Clone)]
@@ -71,6 +71,7 @@ impl Enemy for GenericEnemy {
     fn get_attack_timers(&self) -> Vec<Timer> {
         vec![
             Timer::new(
+                TimerType::EnemyAttack,
                 // Unused, because invisible.
                 &format!("{:?} attack notification timer", self.enemy_type),
                 0,
@@ -83,12 +84,16 @@ impl Enemy for GenericEnemy {
                 false,
             ),
             Timer::new(
-                &String::from(format!("The {:?} is preparing to attack you.", self.enemy_type)),
+                TimerType::EnemyAttack,
+                &String::from(format!(
+                    "The {:?} is preparing to attack you.",
+                    self.enemy_type
+                )),
                 0,
                 self.timer_length,
                 Action::EnemyAttack,
                 true,
-            )
+            ),
         ]
     }
 }
