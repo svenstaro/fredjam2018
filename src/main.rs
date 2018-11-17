@@ -17,6 +17,7 @@ use tui::widgets::canvas::Canvas;
 use tui::widgets::{Block, Borders, Gauge, Paragraph, Text, Widget};
 use tui::Terminal;
 use unicode_width::UnicodeWidthStr;
+use std::ops::Add;
 
 mod action;
 mod enemy;
@@ -35,7 +36,7 @@ use crate::action::{Action, ActionHandled};
 use crate::event::{Event, Events};
 use crate::event_queue::EventQueue;
 use crate::game_event::{GameEvent, GameEventType};
-use crate::rooms::{room_intro_text, CryobayRoom, Room, RoomType, SlushLobbyRoom};
+use crate::rooms::{room_intro_text, adjacent_rooms, CryobayRoom, Room, RoomType, SlushLobbyRoom, room_game_name};
 use crate::state::State;
 use crate::timer::Timer;
 use crate::utils::{duration_to_msec_u64, BoxShape};
@@ -293,11 +294,18 @@ fn main() -> Result<(), io::Error> {
                     })
                 }
                 Action::Enter(room) => {
+                    app.state.current_room = room;
+                    let available_rooms = adjacent_rooms(room);
+                    let mut door_msg = String::from("\n\nYou see ") + &available_rooms.len().to_string() + " doors labeled:\n";
+                    for room in available_rooms {
+                        door_msg += "  - ";
+                        door_msg += room_game_name(room);
+                        door_msg += "\n";
+                    }
                     app.event_queue.schedule_action(Action::Message(
-                        String::from(room_intro_text(room).to_owned() + "\n"),
+                        String::from(room_intro_text(room).to_owned() + &door_msg),
                         GameEventType::Normal,
                     ));
-                    app.state.current_room = room;
                 }
                 Action::Leave(_) => {}
                 Action::Command(tokens) => app.try_handle_command(tokens),
@@ -315,7 +323,6 @@ fn main() -> Result<(), io::Error> {
                         GameEventType::Failure,
                     ));
                 }
-
                 Action::Tick(dt) => {
                     app.event_queue.tick(dt);
                 }
