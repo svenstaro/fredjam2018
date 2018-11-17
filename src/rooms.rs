@@ -52,34 +52,6 @@ impl Room for CryobayRoom {
                 }
                 _ => ActionHandled::NotHandled,
             },
-            Action::Command(command) => {
-                // TODO Maybe there's a better approach to finding the current room...
-                match state.current_room {
-                    RoomType::Cryobay => {
-                        // TODO replace command by proper enum.
-                        if command == &"use lever" {
-                            if !self.lever {
-                                event_queue.schedule_action(Action::Message(
-                                        String::from(
-                                            "You pull the lever, it flips down with a screeching noize.",
-                                            ),
-                                            GameEventType::Success,
-                                            ));
-                                self.lever = true;
-                            } else {
-                                event_queue.schedule_action(Action::Message(
-                                    String::from("There is no point in pulling this back up."),
-                                    GameEventType::Failure,
-                                ));
-                            }
-                            ActionHandled::Handled
-                        } else {
-                            ActionHandled::NotHandled
-                        }
-                    }
-                    _ => ActionHandled::NotHandled,
-                }
-            }
             _ => ActionHandled::NotHandled,
         }
     }
