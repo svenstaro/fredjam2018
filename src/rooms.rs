@@ -15,6 +15,7 @@ pub trait Room: Debug {
 pub enum RoomType {
     Cryobay,
     SlushLobby,
+    Cryocontrol,
 }
 
 // Initial room.
@@ -117,6 +118,7 @@ pub fn room_game_name(room_type: RoomType) -> &'static str {
     match room_type {
         RoomType::Cryobay => "cryobay",
         RoomType::SlushLobby => "slush lobby",
+        RoomType::Cryocontrol => "cryocontrol",
     }
 }
 
@@ -124,5 +126,14 @@ pub fn room_intro_text(room_type: RoomType) -> &'static str {
     match room_type {
         RoomType::Cryobay => include_str!("../assets/rooms/cryobay_enter.txt"),
         RoomType::SlushLobby => include_str!("../assets/rooms/slush_lobby_enter.txt"),
+        RoomType::Cryocontrol => include_str!("../assets/rooms/cryocontrol_enter.txt"),
+    }
+}
+
+pub fn adjacent_rooms(room_type: RoomType) -> Vec<RoomType> {
+    match room_type {
+        RoomType::Cryobay => vec![RoomType::SlushLobby],
+        RoomType::SlushLobby => vec![RoomType::Cryobay, RoomType::Cryocontrol],
+        RoomType::Cryocontrol => vec![RoomType::SlushLobby]
     }
 }
