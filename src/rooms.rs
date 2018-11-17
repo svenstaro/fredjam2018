@@ -1,3 +1,4 @@
+use std::fmt::Debug;
 use crate::EventQueue;
 use crate::{Action, GameEventType, State};
 
