@@ -73,28 +73,6 @@ impl Room for CryobayRoom {
                                 ));
                             }
                             ActionHandled::Handled
-                        } else if command == &"look around" {
-                            event_queue.schedule_action(Action::Message(
-                                    String::from("The room is empty, there is just some lever and a solid door with no handle."),
-                                    GameEventType::Normal,
-                                    ));
-                            ActionHandled::Handled
-                        } else if command == &"use door" {
-                            if self.lever {
-                                event_queue.schedule_action(Action::Message(
-                                    String::from("You open the door and pass through."),
-                                    GameEventType::Success,
-                                ));
-                                event_queue.schedule_action(Action::Leave(RoomType::Cryobay));
-                                event_queue.schedule_action(Action::Enter(RoomType::SlushLobby));
-                                ActionHandled::Handled
-                            } else {
-                                event_queue.schedule_action(Action::Message(
-                                        String::from("No matter how hard you push the door, it does not even move an inch."),
-                                        GameEventType::Failure,
-                                        ));
-                                ActionHandled::Handled
-                            }
                         } else {
                             ActionHandled::NotHandled
                         }
