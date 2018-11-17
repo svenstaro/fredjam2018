@@ -169,8 +169,7 @@ impl Room for WakeUpRoom {
 }
 
 // Second room room, locked per default, lever needs to be pulled.
-#[derive(Default)]
-pub struct LockedRoom {}
+pub struct LockedRoom;
 
 impl Room for LockedRoom {
     fn handle_action(&mut self, state: &mut State, action: &Action) -> bool {
@@ -193,7 +192,6 @@ impl Room for LockedRoom {
     }
 }
 
-// #[derive(Debug)]
 pub struct State {
     pub rooms: HashMap<&'static str, Box<Room>>,
     pub current_room: &'static str,
@@ -225,8 +223,8 @@ impl State {
     }
 }
 
-impl Default for State {
-    fn default() -> Self {
+impl State {
+    fn new() -> Self {
         let mut rooms: HashMap<&'static str, Box<Room>> = HashMap::new();
         rooms.insert("WakeUp", Box::new(WakeUpRoom { lever: false }));
         rooms.insert("Locked", Box::new(LockedRoom {}));
@@ -238,12 +236,22 @@ impl Default for State {
     }
 }
 
-#[derive(Default)]
 pub struct App {
     pub size: Rect,
     pub log: Vec<GameEvent>,
     pub input: String,
     pub state: State,
+}
+
+impl App {
+    fn new(state: State) -> Self {
+        App {
+            size: Default::default(),
+            log: vec![],
+            input: "".into(),
+            state: state,
+        }
+    }
 }
 
 fn main() -> Result<(), io::Error> {
@@ -252,7 +260,8 @@ fn main() -> Result<(), io::Error> {
     let mut terminal = Terminal::new(backend)?;
 
     let events = Events::new();
-    let mut app: App = Default::default();
+    let state = State::new();
+    let mut app = App::new(state);
 
     let mut wake_up = app.state.rooms.remove("WakeUp").unwrap();
     wake_up.handle_action(&mut app.state, &Action::Enter("WakeUp"));
