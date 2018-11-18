@@ -4,6 +4,7 @@ use crate::game_event::GameEventType;
 use crate::App;
 use crate::EventQueue;
 use crate::{Action, ActionHandled, State};
+use crate::sound::{AudioEvent, Track};
 
 pub trait Room: Debug {
     fn handle_action(
@@ -23,6 +24,15 @@ pub enum RoomType {
     SlushLobby,
     Cryocontrol,
     Corridor,
+}
+
+impl RoomType {
+    fn get_track(&self) -> Track {
+        match self {
+            RoomType::Cryobay => Track::Intro,
+            _ => Track::Compliactions,
+        }
+    }
 }
 
 pub fn room_game_name(room_type: RoomType) -> &'static str {
@@ -81,6 +91,12 @@ pub fn room_type_from_name(room_name: &str) -> Option<RoomType> {
     }
 }
 
+fn change_music(app: &mut App, room_type: RoomType) {
+    app.event_queue.schedule_action(Action::Audio(
+        AudioEvent::Track(room_type.get_track())
+    ));
+}
+
 pub fn enter_room(app: &mut App, room_type: RoomType) {
     let enemy_option = app.state.get_current_enemy(room_type);
     let has_visited = app.rooms.get(&room_type).unwrap().is_visited();
@@ -91,6 +107,7 @@ pub fn enter_room(app: &mut App, room_type: RoomType) {
         }
         None => (),
     }
+    change_music(app, room_type);
 
     app.state.current_room = room_type;
     let available_rooms = adjacent_rooms(room_type);
