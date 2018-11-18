@@ -5,10 +5,10 @@ use rand::Rng;
 use std::fmt::Debug;
 
 use crate::room::RoomType;
+use crate::sound::{AudioEvent, Effect};
 use crate::state::State;
 use crate::timer::{Timer, TimerType};
 use crate::{Action, GameEventType};
-use crate::sound::{AudioEvent, Effect};
 
 #[derive(Debug, Copy, Clone)]
 pub enum EnemyType {
@@ -103,21 +103,19 @@ impl Enemy for GenericEnemy {
     }
 
     fn get_initial_attack_timers(&self, delay: u64) -> Vec<Timer> {
-        let mut v = vec![
-            Timer::new(
-                TimerType::EnemyAttack,
-                // Unused, because invisible.
-                &format!("{:?} attack notification timer", self.enemy_type),
-                0,
-                delay,
-                Action::Message(
-                    String::from(format!("The {:?}'s attack is imminent.", self.enemy_type)),
-                    GameEventType::Combat,
-                ),
-                // Should not be visible as a progressbar.
-                false,
+        let mut v = vec![Timer::new(
+            TimerType::EnemyAttack,
+            // Unused, because invisible.
+            &format!("{:?} attack notification timer", self.enemy_type),
+            0,
+            delay,
+            Action::Message(
+                String::from(format!("The {:?}'s attack is imminent.", self.enemy_type)),
+                GameEventType::Combat,
             ),
-        ];
+            // Should not be visible as a progressbar.
+            false,
+        )];
         v.append(&mut self.get_attack_timers(delay));
         v
     }
@@ -139,14 +137,10 @@ impl Enemy for GenericEnemy {
                 "",
                 0,
                 self.timer_length + delay,
-                Action::Audio(
-                    AudioEvent::Effect(
-                        Effect::EnemyAttack
-                    )
-                ),
+                Action::Audio(AudioEvent::Effect(Effect::EnemyAttack)),
                 // Should not be visible as a progressbar.
                 false,
-            )
+            ),
         ]
     }
 }
@@ -168,14 +162,17 @@ pub fn initialize_enemies(state: &mut State) {
     );
     state.enemies.insert(RoomType::Corridor, Box::new(rat));
 
-    let roomba_attack_messages = vec!["You tackle the roomba. It topples over.".into(),
-                                      "You smash in one of the roombas many visual sensors.".into(),
-                                      "You kick the roomba, leaving a dent.".into(),
-                                      "You rip out one of the roombas appendages. It produces a high-pitched beeping wail.".into(),
+    let roomba_attack_messages = vec![
+        "You tackle the roomba. It topples over.".into(),
+        "You smash in one of the roombas many visual sensors.".into(),
+        "You kick the roomba, leaving a dent.".into(),
+        "You rip out one of the roombas appendages. It produces a high-pitched beeping wail."
+            .into(),
     ];
     let roomba_enemy_attack_messages = vec![
         "The roomba vacuums your arm. Some of the skin comes off.".into(),
-        "The roomba swings its broom and hits your head.".into(),];
+        "The roomba swings its broom and hits your head.".into(),
+    ];
 
     let roomba = GenericEnemy::new(
         EnemyType::Roomba,
@@ -185,5 +182,7 @@ pub fn initialize_enemies(state: &mut State) {
         roomba_attack_messages,
         roomba_enemy_attack_messages,
     );
-    state.enemies.insert(RoomType::Cryocontrol, Box::new(roomba));
+    state
+        .enemies
+        .insert(RoomType::Cryocontrol, Box::new(roomba));
 }

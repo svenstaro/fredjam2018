@@ -1,9 +1,8 @@
+use crate::game_event::GameEventType;
 use crate::room::Room;
+use crate::timer::{Timer, TimerType};
 use crate::EventQueue;
 use crate::{Action, ActionHandled, State};
-use crate::game_event::GameEventType;
-use crate::timer::{Timer, TimerType};
-
 
 #[derive(Debug)]
 pub struct Cryocontrol {
@@ -35,30 +34,35 @@ impl Room for Cryocontrol {
                     String::from("Rebooting System... All personal should enter their caskets."),
                     GameEventType::Success,
                 ));
-                event_queue.schedule_timer(
-                    Timer::new(TimerType::Reboot, "Reboot in Progress", 0, 20_000, Action::Rebooted, true)
-                );
+                event_queue.schedule_timer(Timer::new(
+                    TimerType::Reboot,
+                    "Reboot in Progress",
+                    0,
+                    20_000,
+                    Action::Rebooted,
+                    true,
+                ));
                 ActionHandled::Handled
-            },
+            }
             Action::OpenCryoControl => {
                 if !self.opened {
                     self.opened = true;
                     event_queue.schedule_action(Action::Message(
-                            String::from("You open the cryo control door. SSswsschh"),
-                            GameEventType::Success,
-                            ));
+                        String::from("You open the cryo control door. SSswsschh"),
+                        GameEventType::Success,
+                    ));
 
                     ActionHandled::Handled
                 } else {
                     event_queue.schedule_action(Action::Message(
-                            String::from("The cryo control door is already open."),
-                            GameEventType::Failure,
-                            ));
+                        String::from("The cryo control door is already open."),
+                        GameEventType::Failure,
+                    ));
 
                     ActionHandled::Handled
                 }
             }
-            _ => ActionHandled::NotHandled
+            _ => ActionHandled::NotHandled,
         }
     }
 

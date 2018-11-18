@@ -1,10 +1,10 @@
 use std::fmt::Debug;
 
 use crate::game_event::GameEventType;
+use crate::sound::{AudioEvent, Track};
 use crate::App;
 use crate::EventQueue;
 use crate::{Action, ActionHandled, State};
-use crate::sound::{AudioEvent, Track};
 
 pub trait Room: Debug {
     fn handle_action(
@@ -95,9 +95,8 @@ pub fn room_type_from_name(room_name: &str) -> Option<RoomType> {
 }
 
 fn change_music(app: &mut App, room_type: RoomType) {
-    app.event_queue.schedule_action(Action::Audio(
-        AudioEvent::Track(room_type.get_track())
-    ));
+    app.event_queue
+        .schedule_action(Action::Audio(AudioEvent::Track(room_type.get_track())));
 }
 
 pub fn enter_room(app: &mut App, room_type: RoomType) {
@@ -105,7 +104,8 @@ pub fn enter_room(app: &mut App, room_type: RoomType) {
     let has_visited = app.rooms.get(&room_type).unwrap().is_visited();
     match enemy_option {
         Some(enemy) => {
-            let timers = enemy.get_initial_attack_timers(reading_time_msecs(room_type, has_visited));
+            let timers =
+                enemy.get_initial_attack_timers(reading_time_msecs(room_type, has_visited));
             app.event_queue.schedule_timers(timers);
         }
         None => (),
@@ -115,8 +115,11 @@ pub fn enter_room(app: &mut App, room_type: RoomType) {
     app.state.current_room = room_type;
     let available_rooms = adjacent_rooms(room_type);
     let plural = if available_rooms.len() > 1 { "s" } else { "" };
-    let mut door_msg =
-        format!("\nYou see {} door{} labeled:\n", &available_rooms.len(), plural);
+    let mut door_msg = format!(
+        "\nYou see {} door{} labeled:\n",
+        &available_rooms.len(),
+        plural
+    );
     for room in available_rooms {
         door_msg += "  - ";
         door_msg += room_game_name(room);

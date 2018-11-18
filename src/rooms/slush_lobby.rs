@@ -1,8 +1,8 @@
+use crate::entities::Item;
+use crate::game_event::GameEventType;
 use crate::room::Room;
 use crate::EventQueue;
 use crate::{Action, ActionHandled, State};
-use crate::game_event::GameEventType;
-use crate::entities::Item;
 
 // Second room room, locked per default, lever needs to be pulled.
 #[derive(Debug)]
@@ -12,9 +12,7 @@ pub struct SlushLobbyRoom {
 
 impl SlushLobbyRoom {
     pub fn new() -> SlushLobbyRoom {
-        SlushLobbyRoom {
-            visited: false,
-        }
+        SlushLobbyRoom { visited: false }
     }
 }
 
@@ -32,9 +30,9 @@ impl Room for SlushLobbyRoom {
                     ActionHandled::Handled
                 } else {
                     event_queue.schedule_action(Action::Message(
-                            String::from("You don't have a crowbar."),
-                            GameEventType::Failure,
-                            ));
+                        String::from("You don't have a crowbar."),
+                        GameEventType::Failure,
+                    ));
 
                     ActionHandled::Handled
                 }
@@ -45,14 +43,14 @@ impl Room for SlushLobbyRoom {
                     ActionHandled::Handled
                 } else {
                     event_queue.schedule_action(Action::Message(
-                            String::from("You don't have a keycard."),
-                            GameEventType::Failure,
-                            ));
+                        String::from("You don't have a keycard."),
+                        GameEventType::Failure,
+                    ));
 
                     ActionHandled::Handled
                 }
             }
-            _ => ActionHandled::NotHandled
+            _ => ActionHandled::NotHandled,
         }
     }
 
@@ -60,8 +58,7 @@ impl Room for SlushLobbyRoom {
         true
     }
 
-    fn open(&mut self) {
-    }
+    fn open(&mut self) {}
 
     fn visit(&mut self) {
         self.visited = true;

@@ -1,8 +1,8 @@
+use crate::entities::Item;
 use crate::game_event::GameEventType;
 use crate::room::{Room, RoomType};
 use crate::EventQueue;
 use crate::{Action, ActionHandled, State};
-use crate::entities::Item;
 
 #[derive(Debug)]
 pub struct CryobayRoom {
@@ -86,21 +86,21 @@ impl Room for CryobayRoom {
                     state.player.items.push(Item::Crowbar);
                     self.crowbar = false;
                     event_queue.schedule_action(Action::Message(
-                            String::from("You pick up the crowbar."),
-                            GameEventType::Success,
-                            ));
+                        String::from("You pick up the crowbar."),
+                        GameEventType::Success,
+                    ));
 
                     ActionHandled::Handled
                 } else {
                     event_queue.schedule_action(Action::Message(
-                            String::from("You already have the crowbar."),
-                            GameEventType::Failure,
-                            ));
+                        String::from("You already have the crowbar."),
+                        GameEventType::Failure,
+                    ));
 
                     ActionHandled::Handled
                 }
             }
-            _ => ActionHandled::NotHandled
+            _ => ActionHandled::NotHandled,
         }
     }
 
@@ -108,8 +108,7 @@ impl Room for CryobayRoom {
         true
     }
 
-    fn open(&mut self) {
-    }
+    fn open(&mut self) {}
 
     fn visit(&mut self) {
         self.visited = true;

@@ -1,8 +1,8 @@
+use crate::entities::Item;
 use crate::game_event::GameEventType;
 use crate::room::Room;
 use crate::EventQueue;
 use crate::{Action, ActionHandled, State};
-use crate::entities::Item;
 
 #[derive(Debug)]
 pub struct CorridorRoom {
@@ -33,16 +33,18 @@ impl Room for CorridorRoom {
                 if !self.opened {
                     self.opened = true;
                     event_queue.schedule_action(Action::Message(
-                            String::from("You smash open the ventilation shaft cover with your crowbar."),
-                            GameEventType::Success,
-                            ));
+                        String::from(
+                            "You smash open the ventilation shaft cover with your crowbar.",
+                        ),
+                        GameEventType::Success,
+                    ));
 
                     ActionHandled::Handled
                 } else {
                     event_queue.schedule_action(Action::Message(
-                            String::from("The ventilation shaft is already open."),
-                            GameEventType::Failure,
-                            ));
+                        String::from("The ventilation shaft is already open."),
+                        GameEventType::Failure,
+                    ));
 
                     ActionHandled::Handled
                 }
@@ -62,7 +64,7 @@ impl Room for CorridorRoom {
                 }
                 ActionHandled::Handled
             }
-            _ => ActionHandled::NotHandled
+            _ => ActionHandled::NotHandled,
         }
     }
 

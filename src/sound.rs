@@ -26,7 +26,7 @@ pub enum Effect {
     EnemyAttack,
     PlayerAttack,
     Backspace,
-    Door
+    Door,
 }
 
 #[derive(Clone, Copy, PartialEq, Eq, Debug, EnumIter, Hash)]
