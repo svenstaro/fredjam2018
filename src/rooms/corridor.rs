@@ -29,7 +29,7 @@ impl Room for CorridorRoom {
         action: &Action,
     ) -> ActionHandled {
         match action {
-            Action::OpenCryoControl => {
+            Action::OpenCorridor => {
                 if !self.opened {
                     self.opened = true;
                     event_queue.schedule_action(Action::Message(
