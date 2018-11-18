@@ -97,7 +97,7 @@ impl App {
 fn main() -> Result<(), io::Error> {
     let (snd_send, snd_recv) = channel();
 
-    snd_send.send(AudioEvent::Effect(Effect::BeepLong));
+    snd_send.send(AudioEvent::Effect(Effect::Typing));
     thread::spawn(move || {
         sound::start(snd_recv);
     });
@@ -327,7 +327,7 @@ fn main() -> Result<(), io::Error> {
                     }
                 }
                 Key::Char(c) => {
-                    snd_send.send(AudioEvent::Effect(Effect::BeepLong));
+                    snd_send.send(AudioEvent::Effect(Effect::Typing));
                     app.input.push(c);
                 }
                 Key::Backspace => {
