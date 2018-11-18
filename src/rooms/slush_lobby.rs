@@ -41,7 +41,7 @@ impl Room for SlushLobbyRoom {
             }
             Action::UseKeycard => {
                 if state.player.has_item(Item::Crowbar) {
-                    event_queue.schedule_action(Action::OpenCorridor);
+                    event_queue.schedule_action(Action::OpenCryoControl);
                     ActionHandled::Handled
                 } else {
                     event_queue.schedule_action(Action::Message(
