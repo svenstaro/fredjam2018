@@ -8,6 +8,7 @@ use crate::entities::Item;
 pub struct CorridorRoom {
     pub visited: bool,
     pub keycard: bool,
+    pub opened: bool,
 }
 
 impl CorridorRoom {
@@ -15,6 +16,7 @@ impl CorridorRoom {
         CorridorRoom {
             visited: false,
             keycard: true,
+            opened: false,
         }
     }
 }
@@ -44,6 +46,14 @@ impl Room for CorridorRoom {
             }
             _ => ActionHandled::NotHandled
         }
+    }
+
+    fn is_opened(&self) -> bool {
+        self.opened
+    }
+
+    fn open(&mut self) {
+        self.opened = true
     }
 
     fn visit(&mut self) {

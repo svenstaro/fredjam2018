@@ -14,6 +14,8 @@ pub trait Room: Debug {
         action: &Action,
     ) -> ActionHandled;
 
+    fn is_opened(&self) -> bool;
+    fn open(&mut self);
     fn visit(&mut self);
     fn is_visited(&self) -> bool;
 }
@@ -111,8 +113,9 @@ pub fn enter_room(app: &mut App, room_type: RoomType) {
 
     app.state.current_room = room_type;
     let available_rooms = adjacent_rooms(room_type);
+    let plural = if available_rooms.len() > 1 { "s" } else { "" };
     let mut door_msg =
-        String::from("\n\nYou see ") + &available_rooms.len().to_string() + " doors labeled:\n";
+        format!("You see {} door{} labled:\n", &available_rooms.len(), plural);
     for room in available_rooms {
         door_msg += "  - ";
         door_msg += room_game_name(room);

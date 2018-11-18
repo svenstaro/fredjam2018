@@ -6,6 +6,7 @@ use crate::{Action, ActionHandled, State};
 pub struct Cryocontrol {
     pub visited: bool,
     pub lever: bool,
+    pub opened: bool,
 }
 
 impl Cryocontrol {
@@ -13,6 +14,7 @@ impl Cryocontrol {
         Cryocontrol {
             visited: false,
             lever: false,
+            opened: false,
         }
     }
 }
@@ -25,6 +27,14 @@ impl Room for Cryocontrol {
         action: &Action,
     ) -> ActionHandled {
         ActionHandled::NotHandled
+    }
+
+    fn is_opened(&self) -> bool {
+        self.opened
+    }
+
+    fn open(&mut self) {
+        self.opened = true
     }
 
     fn visit(&mut self) {

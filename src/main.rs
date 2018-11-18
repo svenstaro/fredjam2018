@@ -332,6 +332,7 @@ fn main() -> Result<(), io::Error> {
                     app.input.push(c);
                 }
                 Key::Backspace => {
+                    snd_send.send(AudioEvent::Effect(Effect::Backspace));
                     app.input.pop();
                 }
                 _ => {}
@@ -361,12 +362,12 @@ fn main() -> Result<(), io::Error> {
                 }
                 Action::Enter(room_type) => {
                     if room_type == RoomType::Cryocontrol {
-                        if app.state.player.items.iter().any(|&x| x == Item::KeyCard) {
+                        if app.rooms.get(&app.state.current_room).unwrap().is_opened() {
                             enter_room(&mut app, room_type);
                         }
                         else {
                             app.event_queue.schedule_action(Action::Message(
-                                String::from("The door won't open. Probably you're missing a keycard."),
+                                String::from("The door is closed and won't open."),
                                 GameEventType::Failure,
                             ));
                         }
@@ -459,8 +460,10 @@ fn main() -> Result<(), io::Error> {
                     for elem in attack_timers.iter_mut() {
                         elem.elapsed = 0;
                     }
-                    app.event_queue
-                        .emplace_timers(TimerType::EnemyAttack, attack_timers);
+                    if let Some(enemy) = app.state.get_current_enemy(app.state.current_room) {
+                        app.event_queue
+                            .emplace_timers(TimerType::EnemyAttack, enemy.get_attack_timers(0));
+                    }
 
                     let enemy_type = app
                         .state
