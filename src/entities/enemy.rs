@@ -135,7 +135,10 @@ impl Enemy for GenericEnemy {
 
 pub fn initialize_enemies(state: &mut State) {
     let rat_attack_messages = vec!["You stomp on the rat.".into()];
-    let rat_enemy_attack_messages = vec!["The rat gnaws on your leg.".into()];
+    let rat_enemy_attack_messages = vec![
+        "The rat gnaws on your leg.".into(),
+        "The rat runs around you in circles. You try to follow it, stumbling.".into(),
+    ];
 
     let rat = GenericEnemy::new(
         EnemyType::Rat,
@@ -145,18 +148,24 @@ pub fn initialize_enemies(state: &mut State) {
         rat_attack_messages,
         rat_enemy_attack_messages,
     );
-    state.enemies.insert(RoomType::Cryocontrol, Box::new(rat));
+    state.enemies.insert(RoomType::Corridor, Box::new(rat));
 
-    let roomba_attack_messages = vec!["".into()];
-    let roomba_enemy_attack_messages = vec![];
+    let roomba_attack_messages = vec!["You tackle the roomba. It topples over.".into(),
+                                      "You smash in one of the roombas many visual sensors.".into(),
+                                      "You kick the roomba, leaving a dent.".into(),
+                                      "You rip out one of the roombas appendages. It produces a high-pitched beeping wail.".into(),
+    ];
+    let roomba_enemy_attack_messages = vec![
+        "The roomba vacuums your arm. Some of the skin comes off.".into(),
+        "The roomba swings its broom and hits your head.".into(),];
 
     let roomba = GenericEnemy::new(
         EnemyType::Roomba,
+        30,
         5,
-        1,
         5 * 1000,
         roomba_attack_messages,
         roomba_enemy_attack_messages,
     );
-    state.enemies.insert(RoomType::Corridor, Box::new(roomba));
+    state.enemies.insert(RoomType::Cryocontrol, Box::new(roomba));
 }
