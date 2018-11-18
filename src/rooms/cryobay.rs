@@ -84,14 +84,14 @@ impl Room for CryobayRoom {
                     state.player.items.push(Item::Crowbar);
                     self.crowbar = false;
                     event_queue.schedule_action(Action::Message(
-                            String::from("You pick up the key card."),
+                            String::from("You pick up the crowbar."),
                             GameEventType::Failure,
                             ));
 
                     ActionHandled::Handled
                 } else {
                     event_queue.schedule_action(Action::Message(
-                            String::from("You already have the key card."),
+                            String::from("You already have the crowbar."),
                             GameEventType::Failure,
                             ));
 
