@@ -41,10 +41,9 @@ use crate::event::{Event, Events};
 use crate::event_queue::EventQueue;
 use crate::game_event::{GameEvent, GameEventType};
 use crate::global_handlers::handle_action;
-use crate::room::{enter_room, Room, RoomType};
+use crate::room::{Room, RoomType};
 use crate::rooms::{CorridorRoom, CryobayRoom, Cryocontrol, SlushLobbyRoom};
 use crate::sound::{AudioEvent, Effect};
-use crate::timer::TimerType;
 
 use crate::state::State;
 use crate::utils::{duration_to_msec_u64, BoxShape};
