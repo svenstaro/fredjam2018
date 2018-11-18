@@ -318,10 +318,9 @@ fn main() -> Result<(), io::Error> {
 
                         app.log.push_front(GameEvent {
                             content: format!(
-                                "{:?} attacks you! You lose {} HP, you now have {} HP\n",
-                                enemy.get_enemy_type(),
+                                "{} You lose {} HP.\n",
+                                enemy.get_enemy_attack_message(),
                                 enemy.get_attack_strength(),
-                                app.state.player.health,
                             ),
                             game_event_type: GameEventType::Combat,
                         });
@@ -341,15 +340,23 @@ fn main() -> Result<(), io::Error> {
                     match enemy_option {
                         Some(ref mut enemy) => {
                             enemy.reduce_health(damage);
+                            let attack_message = enemy.get_attack_message();
                             if enemy.get_health() <= 0 {
                                 app.state.enemies.remove(&app.state.current_room);
-                                app.event_queue.schedule_action(Action::Message(
-                                    String::from("The enemy has been slain."),
-                                    GameEventType::Failure,
-                                ));
+                                app.log.push_front(GameEvent {
+                                    content: String::from("The enemy has been slain.\n"),
+                                    game_event_type: GameEventType::Failure,
+                                });
                                 app.event_queue
                                     .emplace_timers(TimerType::EnemyAttack, vec![]);
                             }
+                            app.log.push_front(GameEvent {
+                                content: format!(
+                                    "{}\n",
+                                    attack_message
+                                ),
+                                game_event_type: GameEventType::Combat,
+                            });
                         }
                         None => {
                             app.event_queue.schedule_action(Action::Message(
