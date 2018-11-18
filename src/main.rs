@@ -107,7 +107,7 @@ fn main() -> Result<(), io::Error> {
     let mut terminal = Terminal::new(backend)?;
 
     let events = Events::new();
-    let state = State::new();
+    let mut state = State::new();
     let mut app = App::new(state);
 
     app.rooms
@@ -265,7 +265,6 @@ fn main() -> Result<(), io::Error> {
                         let mut content: String = app.input.drain(..).collect();
                         let command = Action::Command(content.clone());
                         content = format!(">>> {}", content);
-                        snd_send.send(AudioEvent::Track(Track::Intro));
                         content.push_str("\n\n");
                         app.log.push_front(GameEvent {
                             content: content,
@@ -313,8 +312,10 @@ fn main() -> Result<(), io::Error> {
                 Action::Command(tokens) => app.try_handle_command(tokens),
                 Action::EnemyAttack => {
                     if let Some(ref enemy) = app.state.get_current_enemy(app.state.current_room) {
-                        let timer = enemy.get_attack_timer(0);
-                        app.event_queue.schedule_timer(timer);
+                        let timers = enemy.get_attack_timers(0);
+                        for timer in timers {
+                            app.event_queue.schedule_timer(timer);
+                        }
 
                         app.log.push_front(GameEvent {
                             content: format!(
@@ -333,7 +334,7 @@ fn main() -> Result<(), io::Error> {
                     }
                 }
                 Action::Audio(action) => {
-                    snd_send.send(action);
+                    snd_send.send(action).unwrap();
                 }
                 Action::Attack => {
                     let damage = app.state.player.attack_strength;
@@ -346,6 +347,9 @@ fn main() -> Result<(), io::Error> {
                                 app.event_queue.schedule_action(Action::Message(
                                     String::from("The enemy has been slain."),
                                     GameEventType::Failure,
+                                ));
+                                app.event_queue.schedule_action(Action::Audio(
+                                    AudioEvent::Effect(Effect::PlayerAttack)
                                 ));
                                 app.event_queue
                                     .emplace_timers(TimerType::EnemyAttack, vec![]);

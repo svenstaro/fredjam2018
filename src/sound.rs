@@ -22,6 +22,8 @@ pub enum AudioEvent {
 #[derive(Clone, Copy, PartialEq, Eq, Debug, Hash)]
 pub enum Effect {
     BeepLong,
+    EnemyAttack,
+    PlayerAttack,
 }
 
 #[derive(Clone, Copy, PartialEq, Eq, Debug, EnumIter, Hash)]
@@ -164,6 +166,8 @@ impl AudioEvent {
         match self {
             AudioEvent::Effect(effect) => match effect {
                 Effect::BeepLong => &include_bytes!("../assets/wav/beep_long.wav")[..],
+                Effect::EnemyAttack => &include_bytes!("../assets/wav/enemy_attack.wav")[..],
+                Effect::PlayerAttack => &include_bytes!("../assets/wav/player_attack.wav")[..],
             },
             AudioEvent::Track(track) => match track {
                 Track::Intro => &include_bytes!("../assets/music/intro.mp3")[..],
