@@ -42,7 +42,7 @@ use crate::event::{Event, Events};
 use crate::event_queue::EventQueue;
 use crate::game_event::{GameEvent, GameEventType};
 use crate::room::{enter_room, Room, RoomType};
-use crate::rooms::{CryobayRoom, Cryocontrol, SlushLobbyRoom};
+use crate::rooms::{CorridorRoom, CryobayRoom, Cryocontrol, SlushLobbyRoom};
 use crate::timer::TimerType;
 
 use crate::state::State;
@@ -117,6 +117,8 @@ fn main() -> Result<(), io::Error> {
         .insert(RoomType::Cryocontrol, Box::new(Cryocontrol::new()));
     app.rooms
         .insert(RoomType::SlushLobby, Box::new(SlushLobbyRoom::new()));
+    app.rooms
+        .insert(RoomType::Corridor, Box::new(CorridorRoom::new()));
 
     app.event_queue
         .schedule_action(Action::Enter(RoomType::Cryobay));
@@ -419,10 +421,7 @@ fn main() -> Result<(), io::Error> {
                                     .emplace_timers(TimerType::EnemyAttack, vec![]);
                             }
                             app.log.push_front(GameEvent {
-                                content: format!(
-                                    "{}\n",
-                                    attack_message
-                                ),
+                                content: format!("{}\n", attack_message),
                                 game_event_type: GameEventType::Combat,
                             });
                         }
