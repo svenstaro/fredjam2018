@@ -1,6 +1,8 @@
 use std::fmt::Debug;
 
-use crate::game_event::GameEventType;
+use strum::EnumProperty;
+
+use crate::game_event::{GameEventType, GameEvent};
 use crate::sound::{AudioEvent, Track};
 use crate::App;
 use crate::EventQueue;
@@ -20,11 +22,15 @@ pub trait Room: Debug {
     fn is_visited(&self) -> bool;
 }
 
-#[derive(Debug, PartialEq, Eq, Hash, Clone, Copy)]
+#[derive(Debug, PartialEq, Eq, Hash, Clone, Copy, EnumProperty)]
 pub enum RoomType {
+    #[strum(props(game_name="cryobay"))]
     Cryobay,
+    #[strum(props(game_name="slush lobby"))]
     SlushLobby,
+    #[strum(props(game_name="cryocontrol"))]
     Cryocontrol,
+    #[strum(props(game_name="ventilation shaft"))]
     Corridor,
 }
 
@@ -35,15 +41,6 @@ impl RoomType {
             RoomType::Cryocontrol => Track::Complications,
             _ => Track::Loop,
         }
-    }
-}
-
-pub fn room_game_name(room_type: RoomType) -> &'static str {
-    match room_type {
-        RoomType::Cryobay => "cryobay",
-        RoomType::SlushLobby => "slush lobby",
-        RoomType::Cryocontrol => "cryocontrol",
-        RoomType::Corridor => "ventilation shaft",
     }
 }
 
@@ -122,19 +119,41 @@ pub fn enter_room(app: &mut App, room_type: RoomType) {
     );
     for room in available_rooms {
         door_msg += "  - ";
-        door_msg += room_game_name(room);
+        door_msg += room.get_str("game_name").unwrap();
         door_msg += "\n";
     }
+
+    app.log.push_front(GameEvent {
+        content: door_msg,
+        game_event_type: GameEventType::Normal
+    });
+
+    app.event_queue.schedule_actions(room_specific_actions(&app, room_type));
+
     if has_visited {
         app.event_queue.schedule_action(Action::Message(
-            String::from(room_intro_text(room_type).0.to_owned() + &door_msg),
+            String::from(room_intro_text(room_type).0),
             GameEventType::Normal,
         ));
     } else {
         app.event_queue.schedule_action(Action::Message(
-            String::from(room_intro_text(room_type).1.to_owned() + &door_msg),
+            String::from(room_intro_text(room_type).1),
             GameEventType::Normal,
         ));
     }
     app.rooms.get_mut(&room_type).unwrap().visit();
+}
+
+fn room_specific_actions(app: &App, room_type: RoomType) -> Vec<Action> {
+    match room_type {
+        RoomType::Cryocontrol => {
+            if (app.rooms.get(&room_type).unwrap().is_visited() &&
+                app.state.get_current_enemy(room_type).is_none()) {
+                    vec![Action::Message("The central cortex rumbles uneasily. There's a terminal in front of it.".into(), GameEventType::Normal)]
+            } else {
+                vec![]
+            }
+        }
+        _ => vec![]
+    }
 }

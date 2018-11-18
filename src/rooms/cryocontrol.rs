@@ -48,7 +48,7 @@ impl Room for Cryocontrol {
                 if !self.opened {
                     self.opened = true;
                     event_queue.schedule_action(Action::Message(
-                        String::from("You open the cryo control door. SSswsschh"),
+                        String::from("You open the cryo control door."),
                         GameEventType::Success,
                     ));
 

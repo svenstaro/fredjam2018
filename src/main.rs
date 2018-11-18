@@ -317,7 +317,7 @@ fn main() -> Result<(), io::Error> {
                     if !app.input.is_empty() {
                         let mut content: String = app.input.drain(..).collect();
                         let command = Action::Command(content.clone());
-                        content = format!(">>> {}", content);
+                        content = format!("\n>>> {}", content);
                         content.push_str("\n\n");
                         app.log.push_front(GameEvent {
                             content: content,

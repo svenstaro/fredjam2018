@@ -36,7 +36,6 @@ pub enum Action {
     PlayerDied,
 
     UseDoor,
-    UseLever,
     UseKeycard,
     UseCrowbar,
     UseCasket,

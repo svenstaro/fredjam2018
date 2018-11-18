@@ -54,7 +54,7 @@ impl Room for CorridorRoom {
                     state.player.items.push(Item::KeyCard);
                     event_queue.schedule_action(Action::Message(
                         String::from("You pick up the keycard."),
-                        GameEventType::Failure,
+                        GameEventType::Success,
                     ));
                 } else {
                     event_queue.schedule_action(Action::Message(

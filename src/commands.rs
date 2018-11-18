@@ -17,7 +17,7 @@ pub fn try_handle_command(tokens: String, state: &State) -> Vec<Action> {
             let maybe_room_type = room_type_from_name(&room_name);
             match maybe_room_type {
                 Some(room_type) => {
-                    if available_rooms.contains(&room_type) {
+                    if (available_rooms.contains(&room_type) || cfg!(debug_assertions)){
                         vec![Action::Leave(state.current_room), Action::Enter(room_type)]
                     } else {
                         vec![Action::Message(
@@ -52,7 +52,6 @@ pub fn try_handle_command(tokens: String, state: &State) -> Vec<Action> {
                 Some("terminal") => vec![Action::UseTerminal],
                 Some("keycard") => vec![Action::UseKeycard],
                 Some("casket") => vec![Action::UseCasket],
-                Some("lever") => vec![Action::UseLever],
                 Some("door") => vec![Action::UseDoor],
                 _ => vec![Action::Message(
                     String::from("No such item."),
