@@ -362,12 +362,12 @@ fn main() -> Result<(), io::Error> {
                 }
                 Action::Enter(room_type) => {
                     if room_type == RoomType::Cryocontrol {
-                        if app.state.player.items.iter().any(|&x| x == Item::KeyCard) {
+                        if app.rooms.get(&app.state.current_room).unwrap().is_opened() {
                             enter_room(&mut app, room_type);
                         }
                         else {
                             app.event_queue.schedule_action(Action::Message(
-                                String::from("The door won't open. Probably you're missing a keycard."),
+                                String::from("The door is closed and won't open."),
                                 GameEventType::Failure,
                             ));
                         }
