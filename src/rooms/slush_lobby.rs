@@ -8,16 +8,12 @@ use crate::entities::Item;
 #[derive(Debug)]
 pub struct SlushLobbyRoom {
     pub visited: bool,
-    pub door_opened: bool,
-    pub shaft_opened: bool,
 }
 
 impl SlushLobbyRoom {
     pub fn new() -> SlushLobbyRoom {
         SlushLobbyRoom {
             visited: false,
-            door_opened: false,
-            shaft_opened: false
         }
     }
 }
@@ -68,6 +64,13 @@ impl Room for SlushLobbyRoom {
             }
             _ => ActionHandled::NotHandled
         }
+    }
+
+    fn is_opened(&self) -> bool {
+        true
+    }
+
+    fn open(&mut self) {
     }
 
     fn visit(&mut self) {

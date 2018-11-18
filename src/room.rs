@@ -14,6 +14,8 @@ pub trait Room: Debug {
         action: &Action,
     ) -> ActionHandled;
 
+    fn is_opened(&self) -> bool;
+    fn open(&mut self);
     fn visit(&mut self);
     fn is_visited(&self) -> bool;
 }

@@ -104,6 +104,13 @@ impl Room for CryobayRoom {
         }
     }
 
+    fn is_opened(&self) -> bool {
+        true
+    }
+
+    fn open(&mut self) {
+    }
+
     fn visit(&mut self) {
         self.visited = true;
     }
