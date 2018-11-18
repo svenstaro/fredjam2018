@@ -1,6 +1,8 @@
 use crate::room::Room;
 use crate::EventQueue;
 use crate::{Action, ActionHandled, State};
+use crate::game_event::GameEventType;
+use crate::entities::Item;
 
 // Second room room, locked per default, lever needs to be pulled.
 #[derive(Debug)]
@@ -28,7 +30,43 @@ impl Room for SlushLobbyRoom {
         action: &Action,
     ) -> ActionHandled {
         match action {
-            _ => return ActionHandled::NotHandled,
+            Action::UseCrowbar => {
+                if !self.shaft_opened && state.player.has_item(Item::Crowbar) {
+                    self.shaft_opened = true;
+                    event_queue.schedule_action(Action::Message(
+                            String::from("You smash open the ventilation shaft cover with your crowbar."),
+                            GameEventType::Success,
+                            ));
+
+                    ActionHandled::Handled
+                } else {
+                    event_queue.schedule_action(Action::Message(
+                            String::from("The ventilation shaft is already open."),
+                            GameEventType::Failure,
+                            ));
+
+                    ActionHandled::Handled
+                }
+            }
+            Action::UseKeycard => {
+                if !self.shaft_opened && state.player.has_item(Item::Crowbar) {
+                    self.door_opened = true;
+                    event_queue.schedule_action(Action::Message(
+                            String::from("You open the cryo control door. SSswsschh"),
+                            GameEventType::Success,
+                            ));
+
+                    ActionHandled::Handled
+                } else {
+                    event_queue.schedule_action(Action::Message(
+                            String::from("The cryo control door is already open."),
+                            GameEventType::Failure,
+                            ));
+
+                    ActionHandled::Handled
+                }
+            }
+            _ => ActionHandled::NotHandled
         }
     }
 

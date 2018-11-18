@@ -31,27 +31,37 @@ pub fn try_handle_command(tokens: String, state: &State) -> Vec<Action> {
         }
         Some("attack") => vec![Action::Attack],
         Some("dodge") => vec![Action::Dodge],
-        _ => vec![Action::Message(
-            String::from("Use one of the following commands: enter, attack, dodge."),
-            GameEventType::Failure,
-        )],
-        Some("dodge") => vec![Action::Dodge],
-        _ => vec![Action::Message(
-            String::from("Use one of the following commands: enter, attack, dodge."),
-            GameEventType::Failure,
-        )],
-        Some("pick up crowbar") => vec![Action::PickUpCrowbar],
-        Some("pick up keycard") => vec![Action::PickUpKeycard],
-        Some("use keycard") => vec![Action::UseKeycard],
-        Some("use crowbar") => vec![Action::UseCrowbar],
-        Some("use casket") => vec![Action::UseCrowbar],
-        Some("use lever") => vec![Action::UseLever],
-        Some("use door") => vec![Action::UseDoor],
+        Some("pickup") => {
+            let item = split.next();
+            match item {
+                Some("crowbar") => vec![Action::PickUpCrowbar],
+                Some("keycard") => vec![Action::PickUpKeycard],
+                _ => vec![Action::Message(
+                    String::from("No such item."),
+                    GameEventType::Failure,
+                    )]
+            }
+        }
 
-        Some("look around") => vec![Action::LookAround],
+        Some("use") => {
+            let item = split.next();
+            match item {
+                Some("crowbar") => vec![Action::UseCrowbar],
+                Some("terminal") => vec![Action::UseTerminal],
+                Some("keycard") => vec![Action::UseKeycard],
+                Some("casket") => vec![Action::UseCrowbar],
+                Some("lever") => vec![Action::UseLever],
+                Some("door") => vec![Action::UseDoor],
+                _ => vec![Action::Message(
+                    String::from("No such item."),
+                    GameEventType::Failure,
+                    )]
+            }
+        }
         _ => vec![Action::Message(
-            String::from("Use one of the following commands: enter, attack, dodge."),
+            String::from("Use one of the following commands: enter, pickup, use, attack, dodge, ."),
             GameEventType::Failure,
         )],
     }
 }
+

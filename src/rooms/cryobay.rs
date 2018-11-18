@@ -9,6 +9,7 @@ pub struct CryobayRoom {
     pub visited: bool,
     pub lever: bool,
     pub crowbar: bool,
+    pub casket_locked: bool,
 }
 
 impl CryobayRoom {
@@ -17,6 +18,7 @@ impl CryobayRoom {
             visited: false,
             lever: false,
             crowbar: true,
+            casket_locked: true,
         }
     }
 }
@@ -84,14 +86,14 @@ impl Room for CryobayRoom {
                     state.player.items.push(Item::Crowbar);
                     self.crowbar = false;
                     event_queue.schedule_action(Action::Message(
-                            String::from("You pick up the key card."),
-                            GameEventType::Failure,
+                            String::from("You pick up the crowbar."),
+                            GameEventType::Success,
                             ));
 
                     ActionHandled::Handled
                 } else {
                     event_queue.schedule_action(Action::Message(
-                            String::from("You already have the key card."),
+                            String::from("You already have the crowbar."),
                             GameEventType::Failure,
                             ));
 
