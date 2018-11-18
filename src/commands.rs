@@ -51,7 +51,7 @@ pub fn try_handle_command(tokens: String, state: &State) -> Vec<Action> {
                 Some("crowbar") => vec![Action::UseCrowbar],
                 Some("terminal") => vec![Action::UseTerminal],
                 Some("keycard") => vec![Action::UseKeycard],
-                Some("casket") => vec![Action::UseCrowbar],
+                Some("casket") => vec![Action::UseCasket],
                 Some("lever") => vec![Action::UseLever],
                 Some("door") => vec![Action::UseDoor],
                 _ => vec![Action::Message(
