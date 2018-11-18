@@ -37,6 +37,7 @@ mod utils;
 use crate::action::{Action, ActionHandled};
 use crate::commands::try_handle_command;
 use crate::entities::enemy::initialize_enemies;
+use crate::entities::player::Item;
 use crate::event::{Event, Events};
 use crate::event_queue::EventQueue;
 use crate::game_event::{GameEvent, GameEventType};
@@ -107,7 +108,7 @@ fn main() -> Result<(), io::Error> {
     let mut terminal = Terminal::new(backend)?;
 
     let events = Events::new();
-    let state = State::new();
+    let mut state = State::new();
     let mut app = App::new(state);
 
     app.rooms
@@ -318,7 +319,6 @@ fn main() -> Result<(), io::Error> {
                         let mut content: String = app.input.drain(..).collect();
                         let command = Action::Command(content.clone());
                         content = format!(">>> {}", content);
-                        snd_send.send(AudioEvent::Track(Track::Intro));
                         content.push_str("\n\n");
                         app.log.push_front(GameEvent {
                             content: content,
@@ -360,14 +360,28 @@ fn main() -> Result<(), io::Error> {
                     })
                 }
                 Action::Enter(room_type) => {
-                    enter_room(&mut app, room_type);
+                    if room_type == RoomType::Cryocontrol {
+                        if app.state.player.items.iter().any(|&x| x == Item::KeyCard) {
+                            enter_room(&mut app, room_type);
+                        }
+                        else {
+                            app.event_queue.schedule_action(Action::Message(
+                                String::from("The door won't open. Probably you're missing a keycard."),
+                                GameEventType::Failure,
+                            ));
+                        }
+                    } else {
+                        enter_room(&mut app, room_type);
+                    }
                 }
                 Action::Leave(_) => {}
                 Action::Command(tokens) => app.try_handle_command(tokens),
                 Action::EnemyAttack => {
                     if let Some(ref enemy) = app.state.get_current_enemy(app.state.current_room) {
-                        let timer = enemy.get_attack_timer(0);
-                        app.event_queue.schedule_timer(timer);
+                        let timers = enemy.get_attack_timers(0);
+                        for timer in timers {
+                            app.event_queue.schedule_timer(timer);
+                        }
 
                         app.log.push_front(GameEvent {
                             content: format!(
@@ -385,7 +399,7 @@ fn main() -> Result<(), io::Error> {
                     }
                 }
                 Action::Audio(action) => {
-                    snd_send.send(action);
+                    snd_send.send(action).unwrap();
                 }
                 Action::Attack => {
                     let damage = app.state.player.attack_strength;
@@ -396,6 +410,9 @@ fn main() -> Result<(), io::Error> {
                             let attack_message = enemy.get_attack_message();
                             if enemy.get_health() <= 0 {
                                 app.state.enemies.remove(&app.state.current_room);
+                                app.event_queue.schedule_action(Action::Audio(
+                                    AudioEvent::Effect(Effect::PlayerAttack)
+                                ));
                                 app.log.push_front(GameEvent {
                                     content: String::from("The enemy has been slain.\n"),
                                     game_event_type: GameEventType::Failure,
@@ -429,7 +446,7 @@ fn main() -> Result<(), io::Error> {
                             app.event_queue.schedule_action(Action::Message(
                                 String::from("You dodge the attack. The enemy calmly analyses your movements."),
                                 GameEventType::Failure,
-                            ));
+                                ));
                             break;
                         }
                         app.event_queue.schedule_action(Action::Message(

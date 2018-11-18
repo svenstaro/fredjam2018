@@ -2,11 +2,13 @@ use crate::game_event::GameEventType;
 use crate::room::{Room, RoomType};
 use crate::EventQueue;
 use crate::{Action, ActionHandled, State};
+use crate::entities::Item;
 
 #[derive(Debug)]
 pub struct CryobayRoom {
     pub visited: bool,
     pub lever: bool,
+    pub crowbar: bool,
 }
 
 impl CryobayRoom {
@@ -14,6 +16,7 @@ impl CryobayRoom {
         CryobayRoom {
             visited: false,
             lever: false,
+            crowbar: true,
         }
     }
 }
@@ -76,7 +79,26 @@ impl Room for CryobayRoom {
                     _ => ActionHandled::NotHandled,
                 }
             }
-            _ => ActionHandled::NotHandled,
+            Action::PickUpCrowbar => {
+                if self.crowbar {
+                    state.player.items.push(Item::Crowbar);
+                    self.crowbar = false;
+                    event_queue.schedule_action(Action::Message(
+                            String::from("You pick up the crowbar."),
+                            GameEventType::Failure,
+                            ));
+
+                    ActionHandled::Handled
+                } else {
+                    event_queue.schedule_action(Action::Message(
+                            String::from("You already have the crowbar."),
+                            GameEventType::Failure,
+                            ));
+
+                    ActionHandled::Handled
+                }
+            }
+            _ => ActionHandled::NotHandled
         }
     }
 

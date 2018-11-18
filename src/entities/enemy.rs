@@ -8,6 +8,7 @@ use crate::room::RoomType;
 use crate::state::State;
 use crate::timer::{Timer, TimerType};
 use crate::{Action, GameEventType};
+use crate::sound::{AudioEvent, Effect};
 
 #[derive(Debug, Copy, Clone)]
 pub enum EnemyType {
@@ -26,7 +27,7 @@ pub trait Enemy: Debug {
 
     fn get_initial_attack_timers(&self, delay: u64) -> Vec<Timer>;
 
-    fn get_attack_timer(&self, delay: u64) -> Timer;
+    fn get_attack_timers(&self, delay: u64) -> Vec<Timer>;
 
     fn get_attack_message(&self) -> String;
 
@@ -102,7 +103,7 @@ impl Enemy for GenericEnemy {
     }
 
     fn get_initial_attack_timers(&self, delay: u64) -> Vec<Timer> {
-        vec![
+        let mut v = vec![
             Timer::new(
                 TimerType::EnemyAttack,
                 // Unused, because invisible.
@@ -116,20 +117,37 @@ impl Enemy for GenericEnemy {
                 // Should not be visible as a progressbar.
                 false,
             ),
-            self.get_attack_timer(delay),
-        ]
+        ];
+        v.append(&mut self.get_attack_timers(delay));
+        v
     }
 
-    fn get_attack_timer(&self, delay: u64) -> Timer {
+    fn get_attack_timers(&self, delay: u64) -> Vec<Timer> {
         let show_bar = (delay <= 0);
-        Timer::new(
-            TimerType::EnemyAttack,
-            &format!("The {:?} is preparing to attack you.", self.enemy_type),
-            0,
-            self.timer_length + delay,
-            Action::EnemyAttack,
-            show_bar,
-        )
+        vec![
+            Timer::new(
+                TimerType::EnemyAttack,
+                &format!("The {:?} is preparing to attack you.", self.enemy_type),
+                0,
+                self.timer_length + delay,
+                Action::EnemyAttack,
+                show_bar,
+            ),
+            Timer::new(
+                TimerType::EnemyAttack,
+                // Unused, because invisible.
+                "",
+                0,
+                self.timer_length + delay,
+                Action::Audio(
+                    AudioEvent::Effect(
+                        Effect::EnemyAttack
+                    )
+                ),
+                // Should not be visible as a progressbar.
+                false,
+            )
+        ]
     }
 }
 

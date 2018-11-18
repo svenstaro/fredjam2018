@@ -28,9 +28,19 @@ pub enum Action {
     // Audio things
     Audio(AudioEvent),
 
+    //Pickup
+    PickUpKeycard,
+    PickUpCrowbar,
+
     // Game logic actions
     PlayerDied,
+
+    UseDoor,
+    UseLever,
     UseKeycard,
+    UseCrowbar,
     UseCasket,
     UseTerminal,
+
+    LookAround,
 }
