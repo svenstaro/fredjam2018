@@ -107,6 +107,7 @@ pub fn enter_room(app: &mut App, room_type: RoomType) {
         }
         None => (),
     }
+    change_music(app, room_type);
 
     app.state.current_room = room_type;
     let available_rooms = adjacent_rooms(room_type);
