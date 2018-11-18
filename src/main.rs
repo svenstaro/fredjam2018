@@ -37,11 +37,12 @@ mod utils;
 use crate::action::{Action, ActionHandled};
 use crate::commands::try_handle_command;
 use crate::entities::enemy::initialize_enemies;
+use crate::entities::player::Item;
 use crate::event::{Event, Events};
 use crate::event_queue::EventQueue;
 use crate::game_event::{GameEvent, GameEventType};
 use crate::room::{enter_room, Room, RoomType};
-use crate::rooms::{CryobayRoom, SlushLobbyRoom, Cryocontrol};
+use crate::rooms::{CryobayRoom, Cryocontrol, SlushLobbyRoom};
 use crate::timer::TimerType;
 
 use crate::state::State;
@@ -357,7 +358,19 @@ fn main() -> Result<(), io::Error> {
                     })
                 }
                 Action::Enter(room_type) => {
-                    enter_room(&mut app, room_type);
+                    if room_type == RoomType::Cryocontrol {
+                        if app.state.player.items.iter().any(|&x| x == Item::KeyCard) {
+                            enter_room(&mut app, room_type);
+                        }
+                        else {
+                            app.event_queue.schedule_action(Action::Message(
+                                String::from("The door won't open. Probably you're missing a keycard."),
+                                GameEventType::Failure,
+                            ));
+                        }
+                    } else {
+                        enter_room(&mut app, room_type);
+                    }
                 }
                 Action::Leave(_) => {}
                 Action::Command(tokens) => app.try_handle_command(tokens),
@@ -434,7 +447,7 @@ fn main() -> Result<(), io::Error> {
                             app.event_queue.schedule_action(Action::Message(
                                 String::from("You dodge the attack. The enemy calmly analyses your movements."),
                                 GameEventType::Failure,
-                            ));
+                                ));
                             break;
                         }
                         app.event_queue.schedule_action(Action::Message(

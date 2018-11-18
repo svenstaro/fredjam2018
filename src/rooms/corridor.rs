@@ -1,16 +1,21 @@
-use crate::entities::enemy::{EnemyType, GenericEnemy};
-use crate::room::{Room, RoomType};
+use crate::game_event::GameEventType;
+use crate::room::Room;
 use crate::EventQueue;
 use crate::{Action, ActionHandled, State};
+use crate::entities::Item;
 
 #[derive(Debug)]
 pub struct CorridorRoom {
     pub visited: bool,
+    pub keycard: bool,
 }
 
 impl CorridorRoom {
     pub fn new() -> CorridorRoom {
-        CorridorRoom { visited: false }
+        CorridorRoom {
+            visited: false,
+            keycard: true,
+        }
     }
 }
 
@@ -21,7 +26,24 @@ impl Room for CorridorRoom {
         event_queue: &mut EventQueue,
         action: &Action,
     ) -> ActionHandled {
-        ActionHandled::NotHandled
+        match action {
+            Action::PickUpKeycard => {
+                if self.keycard {
+                    state.player.items.push(Item::KeyCard);
+                    event_queue.schedule_action(Action::Message(
+                        String::from("You pick up the key card."),
+                        GameEventType::Failure,
+                    ));
+                } else {
+                    event_queue.schedule_action(Action::Message(
+                        String::from("You already have the key card."),
+                        GameEventType::Failure,
+                    ));
+                }
+                ActionHandled::Handled
+            }
+            _ => ActionHandled::NotHandled
+        }
     }
 
     fn visit(&mut self) {

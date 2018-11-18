@@ -40,5 +40,18 @@ pub fn try_handle_command(tokens: String, state: &State) -> Vec<Action> {
             String::from("Use one of the following commands: enter, attack, dodge."),
             GameEventType::Failure,
         )],
+        Some("pick up crowbar") => vec![Action::PickUpCrowbar],
+        Some("pick up keycard") => vec![Action::PickUpKeycard],
+        Some("use keycard") => vec![Action::UseKeycard],
+        Some("use crowbar") => vec![Action::UseCrowbar],
+        Some("use casket") => vec![Action::UseCrowbar],
+        Some("use lever") => vec![Action::UseLever],
+        Some("use door") => vec![Action::UseDoor],
+
+        Some("look around") => vec![Action::LookAround],
+        _ => vec![Action::Message(
+            String::from("Use one of the following commands: enter, attack, dodge."),
+            GameEventType::Failure,
+        )],
     }
 }
