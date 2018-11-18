@@ -91,22 +91,26 @@ pub fn room_type_from_name(room_name: &str) -> Option<RoomType> {
     }
 }
 
+pub fn closed_message(room_type: RoomType) -> String {
+    match room_type {
+        RoomType::Corridor => "Peering through the ventilation shafts, \
+                               it looks like they connect to a corridor. \
+                               You would need a tool to get through."
+            .into(),
+        _ => format!(
+            "The door to {} is closed and won't open.",
+            room_type.get_str("game_name").unwrap()
+        )
+        .into(),
+    }
+}
+
 fn change_music(app: &mut App, room_type: RoomType) {
     app.event_queue
         .schedule_action(Action::Audio(AudioEvent::Track(room_type.get_track())));
 }
 
 pub fn enter_room(app: &mut App, room_type: RoomType) {
-    let enemy_option = app.state.get_current_enemy(room_type);
-    let has_visited = app.rooms.get(&room_type).unwrap().is_visited();
-    match enemy_option {
-        Some(enemy) => {
-            let timers =
-                enemy.get_initial_attack_timers(reading_time_msecs(room_type, has_visited));
-            app.event_queue.schedule_timers(timers);
-        }
-        None => (),
-    }
     change_music(app, room_type);
 
     app.state.current_room = room_type;
@@ -131,6 +135,7 @@ pub fn enter_room(app: &mut App, room_type: RoomType) {
     app.event_queue
         .schedule_actions(room_specific_actions(&app, room_type));
 
+    let has_visited = app.rooms.get(&room_type).unwrap().is_visited();
     if has_visited {
         app.event_queue.schedule_action(Action::Message(
             String::from(room_intro_text(room_type).0),

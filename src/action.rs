@@ -14,6 +14,7 @@ pub enum Action {
     Tick(u64),
     Message(String, GameEventType),
     Command(String),
+    PlayerFinishedReading,
 
     // Player
     Attack,

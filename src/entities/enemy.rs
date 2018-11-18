@@ -25,7 +25,7 @@ pub trait Enemy: Debug {
 
     fn get_attack_strength(&self) -> i32;
 
-    fn get_initial_attack_timers(&self, delay: u64) -> Vec<Timer>;
+    fn get_initial_attack_timers(&self) -> Vec<Timer>;
 
     fn get_attack_timers(&self, delay: u64) -> Vec<Timer>;
 
@@ -102,26 +102,11 @@ impl Enemy for GenericEnemy {
         }
     }
 
-    fn get_initial_attack_timers(&self, delay: u64) -> Vec<Timer> {
-        let mut v = vec![Timer::new(
-            TimerType::EnemyAttack,
-            // Unused, because invisible.
-            &format!("{:?} attack notification timer", self.enemy_type),
-            0,
-            delay,
-            Action::Message(
-                String::from(format!("The {:?}'s attack is imminent.", self.enemy_type)),
-                GameEventType::Combat,
-            ),
-            // Should not be visible as a progressbar.
-            false,
-        )];
-        v.append(&mut self.get_attack_timers(delay));
-        v
+    fn get_initial_attack_timers(&self) -> Vec<Timer> {
+        self.get_attack_timers(2000)
     }
 
     fn get_attack_timers(&self, delay: u64) -> Vec<Timer> {
-        let show_bar = (delay <= 0);
         vec![
             Timer::new(
                 TimerType::EnemyAttack,
@@ -129,7 +114,7 @@ impl Enemy for GenericEnemy {
                 0,
                 self.timer_length + delay,
                 Action::EnemyAttack,
-                show_bar,
+                true,
             ),
             Timer::new(
                 TimerType::EnemyAttack,

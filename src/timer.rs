@@ -42,7 +42,11 @@ impl Timer {
     }
 
     pub fn current_percent(&self) -> u8 {
-        (self.elapsed * 100 / self.duration) as u8
+        if self.duration != 0 {
+            (self.elapsed * 100 / self.duration) as u8
+        } else {
+            0
+        }
     }
 
     pub fn is_done(&self) -> bool {

@@ -329,6 +329,9 @@ fn main() -> Result<(), io::Error> {
                 }
                 Key::Char(c) => {
                     snd_send.send(AudioEvent::Effect(Effect::Typing));
+                    if app.input.is_empty() {
+                        app.event_queue.schedule_action(Action::PlayerFinishedReading)
+                    }
                     app.input.push(c);
                 }
                 Key::Backspace => {
