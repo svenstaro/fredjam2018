@@ -332,6 +332,7 @@ fn main() -> Result<(), io::Error> {
                     app.input.push(c);
                 }
                 Key::Backspace => {
+                    snd_send.send(AudioEvent::Effect(Effect::Backspace));
                     app.input.pop();
                 }
                 _ => {}
