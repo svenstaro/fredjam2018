@@ -42,5 +42,7 @@ pub enum Action {
     UseCasket,
     UseTerminal,
 
-    LookAround,
+    // Open Rooms
+    OpenCorridor,
+    OpenCryoControl,
 }

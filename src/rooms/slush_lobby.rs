@@ -27,17 +27,12 @@ impl Room for SlushLobbyRoom {
     ) -> ActionHandled {
         match action {
             Action::UseCrowbar => {
-                if !self.shaft_opened && state.player.has_item(Item::Crowbar) {
-                    self.shaft_opened = true;
-                    event_queue.schedule_action(Action::Message(
-                            String::from("You smash open the ventilation shaft cover with your crowbar."),
-                            GameEventType::Success,
-                            ));
-
+                if !state.player.has_item(Item::Crowbar) {
+                    event_queue.schedule_action(Action::OpenCorridor);
                     ActionHandled::Handled
                 } else {
                     event_queue.schedule_action(Action::Message(
-                            String::from("The ventilation shaft is already open."),
+                            String::from("You don't have a crowbar."),
                             GameEventType::Failure,
                             ));
 
@@ -45,17 +40,12 @@ impl Room for SlushLobbyRoom {
                 }
             }
             Action::UseKeycard => {
-                if !self.shaft_opened && state.player.has_item(Item::Crowbar) {
-                    self.door_opened = true;
-                    event_queue.schedule_action(Action::Message(
-                            String::from("You open the cryo control door. SSswsschh"),
-                            GameEventType::Success,
-                            ));
-
+                if state.player.has_item(Item::Crowbar) {
+                    event_queue.schedule_action(Action::OpenCorridor);
                     ActionHandled::Handled
                 } else {
                     event_queue.schedule_action(Action::Message(
-                            String::from("The cryo control door is already open."),
+                            String::from("You don't have a keycard."),
                             GameEventType::Failure,
                             ));
 

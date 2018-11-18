@@ -1,6 +1,7 @@
 use crate::room::Room;
 use crate::EventQueue;
 use crate::{Action, ActionHandled, State};
+use crate::game_event::GameEventType;
 
 #[derive(Debug)]
 pub struct Cryocontrol {
@@ -26,7 +27,27 @@ impl Room for Cryocontrol {
         event_queue: &mut EventQueue,
         action: &Action,
     ) -> ActionHandled {
-        ActionHandled::NotHandled
+        match action {
+            Action::OpenCryoControl => {
+                if !self.opened {
+                    self.opened = true;
+                    event_queue.schedule_action(Action::Message(
+                            String::from("You open the cryo control door. SSswsschh"),
+                            GameEventType::Success,
+                            ));
+
+                    ActionHandled::Handled
+                } else {
+                    event_queue.schedule_action(Action::Message(
+                            String::from("The cryo control door is already open."),
+                            GameEventType::Failure,
+                            ));
+
+                    ActionHandled::Handled
+                }
+            }
+            _ => ActionHandled::NotHandled
+        }
     }
 
     fn is_opened(&self) -> bool {

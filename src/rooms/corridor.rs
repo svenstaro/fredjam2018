@@ -29,6 +29,24 @@ impl Room for CorridorRoom {
         action: &Action,
     ) -> ActionHandled {
         match action {
+            Action::OpenCryoControl => {
+                if !self.opened {
+                    self.opened = true;
+                    event_queue.schedule_action(Action::Message(
+                            String::from("You smash open the ventilation shaft cover with your crowbar."),
+                            GameEventType::Success,
+                            ));
+
+                    ActionHandled::Handled
+                } else {
+                    event_queue.schedule_action(Action::Message(
+                            String::from("The ventilation shaft is already open."),
+                            GameEventType::Failure,
+                            ));
+
+                    ActionHandled::Handled
+                }
+            }
             Action::PickUpKeycard => {
                 if self.keycard {
                     state.player.items.push(Item::KeyCard);
