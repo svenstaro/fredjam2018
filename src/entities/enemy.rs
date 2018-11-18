@@ -161,7 +161,7 @@ pub fn initialize_enemies(state: &mut State) {
     let rat = GenericEnemy::new(
         EnemyType::Rat,
         10,
-        2,
+        5,
         8 * 1000,
         rat_attack_messages,
         rat_enemy_attack_messages,
@@ -180,8 +180,8 @@ pub fn initialize_enemies(state: &mut State) {
     let roomba = GenericEnemy::new(
         EnemyType::Roomba,
         30,
-        5,
-        5 * 1000,
+        10,
+        3 * 1000,
         roomba_attack_messages,
         roomba_enemy_attack_messages,
     );

@@ -367,7 +367,7 @@ fn main() -> Result<(), io::Error> {
                 }
                 Action::Enter(room_type) => {
                     if room_type == RoomType::Cryocontrol {
-                        if app.rooms.get(&app.state.current_room).unwrap().is_opened() {
+                        if app.rooms.get(&room_type).unwrap().is_opened() {
                             enter_room(&mut app, room_type);
                         } else {
                             app.event_queue.schedule_action(Action::Message(
@@ -376,7 +376,7 @@ fn main() -> Result<(), io::Error> {
                             ));
                         }
                     } else if room_type == RoomType::Corridor {
-                        if app.rooms.get(&app.state.current_room).unwrap().is_opened() {
+                        if app.rooms.get(&room_type).unwrap().is_opened() {
                             enter_room(&mut app, room_type);
                         } else {
                             app.event_queue.schedule_action(Action::Message(
