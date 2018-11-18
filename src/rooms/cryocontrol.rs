@@ -2,6 +2,8 @@ use crate::room::Room;
 use crate::EventQueue;
 use crate::{Action, ActionHandled, State};
 use crate::game_event::GameEventType;
+use crate::timer::{Timer, TimerType};
+
 
 #[derive(Debug)]
 pub struct Cryocontrol {
@@ -28,6 +30,16 @@ impl Room for Cryocontrol {
         action: &Action,
     ) -> ActionHandled {
         match action {
+            Action::UseTerminal => {
+                event_queue.schedule_action(Action::Message(
+                    String::from("Rebooting System... All personal should enter their caskets."),
+                    GameEventType::Success,
+                ));
+                event_queue.schedule_timer(
+                    Timer::new(TimerType::Reboot, "Reboot in Progress", 0, 20_000, Action::Rebooted, true)
+                );
+                ActionHandled::Handled
+            },
             Action::OpenCryoControl => {
                 if !self.opened {
                     self.opened = true;

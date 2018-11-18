@@ -45,4 +45,6 @@ pub enum Action {
     // Open Rooms
     OpenCorridor,
     OpenCryoControl,
+
+    Rebooted,
 }

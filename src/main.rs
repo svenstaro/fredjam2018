@@ -359,6 +359,12 @@ fn main() -> Result<(), io::Error> {
                         game_event_type,
                     })
                 }
+                Action::Rebooted => {
+                    app.event_queue.schedule_action(Action::Message(
+                        String::from("System rebooted sucessfully"),
+                        GameEventType::Success,
+                    ));
+                }
                 Action::Enter(room_type) => {
                     if room_type == RoomType::Cryocontrol {
                         if app.rooms.get(&app.state.current_room).unwrap().is_opened() {

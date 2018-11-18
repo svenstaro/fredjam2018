@@ -5,6 +5,7 @@ pub enum TimerType {
     EnemyAttack,
     Oxygen,
     Storytime,
+    Reboot,
 }
 
 #[derive(Debug, Clone)]
