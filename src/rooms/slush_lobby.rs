@@ -1,5 +1,4 @@
-use crate::entities::enemy::{Enemy, EnemyType, GenericEnemy};
-use crate::room::{Room, RoomType};
+use crate::room::Room;
 use crate::EventQueue;
 use crate::{Action, ActionHandled, State};
 
@@ -7,11 +6,17 @@ use crate::{Action, ActionHandled, State};
 #[derive(Debug)]
 pub struct SlushLobbyRoom {
     pub visited: bool,
+    pub door_opened: bool,
+    pub shaft_opened: bool,
 }
 
 impl SlushLobbyRoom {
     pub fn new() -> SlushLobbyRoom {
-        SlushLobbyRoom { visited: false }
+        SlushLobbyRoom {
+            visited: false,
+            door_opened: false,
+            shaft_opened: false
+        }
     }
 }
 
