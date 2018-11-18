@@ -1,6 +1,5 @@
 extern crate num;
 
-use self::sound::{AudioEvent, Effect, Track};
 use num::clamp;
 use std::collections::{HashMap, VecDeque};
 use std::io::{self, Write};
@@ -37,12 +36,12 @@ mod utils;
 use crate::action::{Action, ActionHandled};
 use crate::commands::try_handle_command;
 use crate::entities::enemy::initialize_enemies;
-use crate::entities::player::Item;
 use crate::event::{Event, Events};
 use crate::event_queue::EventQueue;
 use crate::game_event::{GameEvent, GameEventType};
 use crate::room::{enter_room, Room, RoomType};
 use crate::rooms::{CorridorRoom, CryobayRoom, Cryocontrol, SlushLobbyRoom};
+use crate::sound::{AudioEvent, Effect};
 use crate::timer::TimerType;
 
 use crate::state::State;
@@ -364,8 +363,7 @@ fn main() -> Result<(), io::Error> {
                     if room_type == RoomType::Cryocontrol {
                         if app.rooms.get(&app.state.current_room).unwrap().is_opened() {
                             enter_room(&mut app, room_type);
-                        }
-                        else {
+                        } else {
                             app.event_queue.schedule_action(Action::Message(
                                 String::from("The door is closed and won't open."),
                                 GameEventType::Failure,
@@ -418,9 +416,10 @@ fn main() -> Result<(), io::Error> {
                             let attack_message = enemy.get_attack_message();
                             if enemy.get_health() <= 0 {
                                 app.state.enemies.remove(&app.state.current_room);
-                                app.event_queue.schedule_action(Action::Audio(
-                                    AudioEvent::Effect(Effect::PlayerAttack)
-                                ));
+                                app.event_queue
+                                    .schedule_action(Action::Audio(AudioEvent::Effect(
+                                        Effect::PlayerAttack,
+                                    )));
                                 app.log.push_front(GameEvent {
                                     content: String::from("The enemy has been slain.\n"),
                                     game_event_type: GameEventType::Failure,
