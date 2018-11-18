@@ -195,8 +195,8 @@ fn main() -> Result<(), io::Error> {
                 .paint(|ctx| {
                     ctx.draw(&BoxShape {
                         rect: Rect {
-                            x: 50,
-                            y: 50,
+                            x: 20,
+                            y: 70,
                             width: 20,
                             height: 20,
                         },
@@ -207,13 +207,64 @@ fn main() -> Result<(), io::Error> {
                     });
                     ctx.draw(&BoxShape {
                         rect: Rect {
+                            x: 30,
+                            y: 60,
+                            width: 5,
+                            height: 10,
+                        },
+                        color: Color::White,
+                    });
+                    ctx.draw(&BoxShape {
+                        rect: Rect {
                             x: 20,
-                            y: 20,
+                            y: 40,
                             width: 20,
                             height: 20,
                         },
                         color: match app.state.current_room {
                             RoomType::SlushLobby => Color::Red,
+                            _ => Color::White,
+                        },
+                    });
+                    ctx.draw(&BoxShape {
+                        rect: Rect {
+                            x: 40,
+                            y: 45,
+                            width: 10,
+                            height: 5,
+                        },
+                        color: Color::White,
+                    });
+                    ctx.draw(&BoxShape {
+                        rect: Rect {
+                            x: 50,
+                            y: 40,
+                            width: 20,
+                            height: 20,
+                        },
+                        color: match app.state.current_room {
+                            RoomType::Cryocontrol => Color::Red,
+                            _ => Color::White,
+                        },
+                    });
+                    ctx.draw(&BoxShape {
+                        rect: Rect {
+                            x: 24,
+                            y: 17,
+                            width: 2,
+                            height: 22,
+                        },
+                        color: Color::White,
+                    });
+                    ctx.draw(&BoxShape {
+                        rect: Rect {
+                            x: 20,
+                            y: 5,
+                            width: 35,
+                            height: 12,
+                        },
+                        color: match app.state.current_room {
+                            RoomType::Corridor => Color::Red,
                             _ => Color::White,
                         },
                     });
