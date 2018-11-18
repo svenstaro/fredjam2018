@@ -27,7 +27,7 @@ impl Room for SlushLobbyRoom {
     ) -> ActionHandled {
         match action {
             Action::UseCrowbar => {
-                if !state.player.has_item(Item::Crowbar) {
+                if state.player.has_item(Item::Crowbar) {
                     event_queue.schedule_action(Action::OpenCorridor);
                     ActionHandled::Handled
                 } else {
