@@ -382,6 +382,7 @@ fn main() -> Result<(), io::Error> {
                                 GameEventType::Failure,
                             ));
                         }
+
                     } else {
                         enter_room(&mut app, room_type);
                     }

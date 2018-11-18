@@ -4,5 +4,5 @@ In the corner of the slush lobby, a pale figure is sitting, leaned against the w
 A constant wind pushes against you, this room has pretty large ventilation shafts.
 You make a mental note, such rooms always have the best air quality on a ship.
 
-"Dear Passengers," the voice that had to belong to the ship's AI started. "An unexpe-" backtracking, she started again: "I have found a way to route failover energy to your wing. Please report to the bridge for further instructions."
-At one side of the room, you see a door with a label saying "cryocontrol". You here faint rustling on the other side.
+"Dear Passengers," the voice that had to belong to the ship's AI started. "An unexpe-" backtracking, she started again: "I have found a way to route failover energy to your wing. A solar storm has incapacitated most of the ships solar sails. You will need to power cycle the central cortex to reactivate them and resume cryosleep."
+At one side of the room, you see a door with a label saying "cryocontrol". You hear faint rustling on the other side.

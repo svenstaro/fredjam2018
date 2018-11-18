@@ -43,7 +43,7 @@ pub fn room_game_name(room_type: RoomType) -> &'static str {
         RoomType::Cryobay => "cryobay",
         RoomType::SlushLobby => "slush lobby",
         RoomType::Cryocontrol => "cryocontrol",
-        RoomType::Corridor => "corridor",
+        RoomType::Corridor => "ventilation shaft",
     }
 }
 
@@ -89,7 +89,7 @@ pub fn room_type_from_name(room_name: &str) -> Option<RoomType> {
         "cryobay" => Some(RoomType::Cryobay),
         "slush lobby" => Some(RoomType::SlushLobby),
         "cryocontrol" => Some(RoomType::Cryocontrol),
-        "corridor" => Some(RoomType::Corridor),
+        "ventilation shaft" => Some(RoomType::Corridor),
         _ => None,
     }
 }
@@ -116,7 +116,7 @@ pub fn enter_room(app: &mut App, room_type: RoomType) {
     let available_rooms = adjacent_rooms(room_type);
     let plural = if available_rooms.len() > 1 { "s" } else { "" };
     let mut door_msg =
-        format!("You see {} door{} labled:\n", &available_rooms.len(), plural);
+        format!("\nYou see {} door{} labeled:\n", &available_rooms.len(), plural);
     for room in available_rooms {
         door_msg += "  - ";
         door_msg += room_game_name(room);
