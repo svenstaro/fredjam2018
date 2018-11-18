@@ -1,9 +1,10 @@
 use tui::style::{Color, Style};
 use tui::widgets::Text;
 
-#[derive(Debug)]
+#[derive(Debug, PartialEq, Eq, Hash, Clone, Copy)]
 pub enum Item {
-    Gun { usages: i32 },
+    KeyCard,
+    Crowbar,
 }
 
 #[derive(Debug)]
@@ -27,5 +28,14 @@ impl Player {
                 },
             ),
         ]
+    }
+
+    pub fn has_item(&self, item: Item) -> bool {
+        for owned_item in &self.items {
+            if item == *owned_item {
+                return true;
+            }
+        }
+        false
     }
 }

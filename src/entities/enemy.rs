@@ -152,8 +152,8 @@ impl Enemy for GenericEnemy {
 }
 
 pub fn initialize_enemies(state: &mut State) {
-    let rat_attack_messages = vec!["The rat gnaws on your leg.".into()];
-    let rat_enemy_attack_messages = vec![];
+    let rat_attack_messages = vec!["You stomp on the rat.".into()];
+    let rat_enemy_attack_messages = vec!["The rat gnaws on your leg.".into()];
 
     let rat = GenericEnemy::new(
         EnemyType::Rat,

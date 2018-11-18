@@ -1,6 +1,7 @@
 use crate::game_event::GameEventType;
 use crate::room::RoomType;
 use crate::sound::AudioEvent;
+use crate::entities::Item;
 
 pub enum ActionHandled {
     Handled,
@@ -9,22 +10,27 @@ pub enum ActionHandled {
 
 #[derive(Debug, PartialEq, Eq, Hash, Clone)]
 pub enum Action {
-    // Do nothing.
-    Nop,
-    Enter(RoomType),
+    // System Actions.
     Tick(u64),
-    Leave(RoomType),
     Message(String, GameEventType),
     Command(String),
 
     // Player
     Attack,
     Dodge,
-    PlayerDied,
+    PickUp(Item),
+    Enter(RoomType),
+    Leave(RoomType),
 
     // Enemy attack
     EnemyAttack,
 
     // Audio things
     Audio(AudioEvent),
+
+    // Game logic actions
+    PlayerDied,
+    UseKeycard,
+    UseCasket,
+    UseTerminal,
 }

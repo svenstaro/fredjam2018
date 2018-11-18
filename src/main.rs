@@ -195,8 +195,8 @@ fn main() -> Result<(), io::Error> {
                 .paint(|ctx| {
                     ctx.draw(&BoxShape {
                         rect: Rect {
-                            x: 50,
-                            y: 50,
+                            x: 20,
+                            y: 70,
                             width: 20,
                             height: 20,
                         },
@@ -207,13 +207,64 @@ fn main() -> Result<(), io::Error> {
                     });
                     ctx.draw(&BoxShape {
                         rect: Rect {
+                            x: 30,
+                            y: 60,
+                            width: 5,
+                            height: 10,
+                        },
+                        color: Color::White,
+                    });
+                    ctx.draw(&BoxShape {
+                        rect: Rect {
                             x: 20,
-                            y: 20,
+                            y: 40,
                             width: 20,
                             height: 20,
                         },
                         color: match app.state.current_room {
                             RoomType::SlushLobby => Color::Red,
+                            _ => Color::White,
+                        },
+                    });
+                    ctx.draw(&BoxShape {
+                        rect: Rect {
+                            x: 40,
+                            y: 45,
+                            width: 10,
+                            height: 5,
+                        },
+                        color: Color::White,
+                    });
+                    ctx.draw(&BoxShape {
+                        rect: Rect {
+                            x: 50,
+                            y: 40,
+                            width: 20,
+                            height: 20,
+                        },
+                        color: match app.state.current_room {
+                            RoomType::Cryocontrol => Color::Red,
+                            _ => Color::White,
+                        },
+                    });
+                    ctx.draw(&BoxShape {
+                        rect: Rect {
+                            x: 24,
+                            y: 17,
+                            width: 2,
+                            height: 22,
+                        },
+                        color: Color::White,
+                    });
+                    ctx.draw(&BoxShape {
+                        rect: Rect {
+                            x: 20,
+                            y: 5,
+                            width: 35,
+                            height: 12,
+                        },
+                        color: match app.state.current_room {
+                            RoomType::Corridor => Color::Red,
                             _ => Color::White,
                         },
                     });
@@ -319,10 +370,9 @@ fn main() -> Result<(), io::Error> {
 
                         app.log.push_front(GameEvent {
                             content: format!(
-                                "{:?} attacks you! You lose {} HP, you now have {} HP\n",
-                                enemy.get_enemy_type(),
+                                "{} You lose {} HP.\n",
+                                enemy.get_enemy_attack_message(),
                                 enemy.get_attack_strength(),
-                                app.state.player.health,
                             ),
                             game_event_type: GameEventType::Combat,
                         });
@@ -342,18 +392,26 @@ fn main() -> Result<(), io::Error> {
                     match enemy_option {
                         Some(ref mut enemy) => {
                             enemy.reduce_health(damage);
+                            let attack_message = enemy.get_attack_message();
                             if enemy.get_health() <= 0 {
                                 app.state.enemies.remove(&app.state.current_room);
-                                app.event_queue.schedule_action(Action::Message(
-                                    String::from("The enemy has been slain."),
-                                    GameEventType::Failure,
-                                ));
                                 app.event_queue.schedule_action(Action::Audio(
                                     AudioEvent::Effect(Effect::PlayerAttack)
                                 ));
+                                app.log.push_front(GameEvent {
+                                    content: String::from("The enemy has been slain.\n"),
+                                    game_event_type: GameEventType::Failure,
+                                });
                                 app.event_queue
                                     .emplace_timers(TimerType::EnemyAttack, vec![]);
                             }
+                            app.log.push_front(GameEvent {
+                                content: format!(
+                                    "{}\n",
+                                    attack_message
+                                ),
+                                game_event_type: GameEventType::Combat,
+                            });
                         }
                         None => {
                             app.event_queue.schedule_action(Action::Message(
