@@ -15,6 +15,7 @@ pub enum Action {
     Message(String, GameEventType),
     Command(String),
     PlayerFinishedReading,
+    GameOver,
 
     // Player
     Attack,

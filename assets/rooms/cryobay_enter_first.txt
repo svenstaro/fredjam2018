@@ -11,3 +11,5 @@ You step out into a dimly lit room. It is full of other, empty cryosleep caskets
 "Your name is-" the voice stops abrubtly, "Your-" a short pause - "Your personal records are unavailable at the moment. Contact the bridge to obtain additional information."
 A door at the other side of the room slides open.
 "Please proceed to the slush lobby."
+
+Use the command "enter" to move between rooms.

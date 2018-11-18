@@ -100,6 +100,16 @@ impl Room for CryobayRoom {
                     ActionHandled::Handled
                 }
             }
+            Action::UseCasket => {
+                event_queue.schedule_action(Action::Message(
+                    "\"Reboot initiated.\" Those are the last words you hear as you slip back into cryosleep once again.".into(),
+                    GameEventType::Success
+                ));
+
+                event_queue.schedule_action(Action::GameOver);
+
+                ActionHandled::Handled
+            }
             _ => ActionHandled::NotHandled,
         }
     }

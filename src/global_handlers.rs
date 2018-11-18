@@ -23,8 +23,8 @@ pub fn handle_action(mut app: &mut App, next_action: Action) {
         }
         Action::Rebooted => {
             app.event_queue.schedule_action(Action::Message(
-                String::from("System rebooted sucessfully"),
-                GameEventType::Success,
+                String::from("\"Initiating reboot.\" The room goes black. You notice a coldness quickly creeping into the air and start to shiver. As the air gets thinner and thinner, you slowly slip into unconsciousness."),
+                GameEventType::Failure,
             ));
         }
         Action::Enter(room_type) => {

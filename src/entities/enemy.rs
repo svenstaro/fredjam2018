@@ -161,8 +161,8 @@ pub fn initialize_enemies(state: &mut State) {
 
     let roomba = GenericEnemy::new(
         EnemyType::Roomba,
-        30,
-        10,
+        40,
+        20,
         3 * 1000,
         roomba_attack_messages,
         roomba_enemy_attack_messages,

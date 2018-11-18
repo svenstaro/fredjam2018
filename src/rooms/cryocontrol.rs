@@ -30,15 +30,24 @@ impl Room for Cryocontrol {
     ) -> ActionHandled {
         match action {
             Action::UseTerminal => {
+                if let Some(enemy) = state.get_current_enemy(state.current_room) {
+                    event_queue.schedule_action(Action::Message(
+                        format!("The {:?} is blocking you from getting to the terminal.", enemy.get_enemy_type()),
+                        GameEventType::Failure
+                    ));
+                    return ActionHandled::Handled;
+                }
+
+                let time_to_reboot = 20_000;
                 event_queue.schedule_action(Action::Message(
-                    String::from("Rebooting System... All personal should enter their caskets."),
+                    format!("The AI's voice is slowly dying. \"Rebooting System in {} seconds... boot process, life support systems will be offline. All passengers, please enter cryosleep caskets immediately.", time_to_reboot / 1000),
                     GameEventType::Success,
                 ));
                 event_queue.schedule_timer(Timer::new(
                     TimerType::Reboot,
-                    "Reboot in Progress",
+                    "Reboot countdown",
                     0,
-                    20_000,
+                    time_to_reboot,
                     Action::Rebooted,
                     true,
                 ));

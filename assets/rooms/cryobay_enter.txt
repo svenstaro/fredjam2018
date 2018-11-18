@@ -1,3 +1,5 @@
 You're back in the Cryobay where you woke up.
 
 You notice a crowbar leaned against the wall.
+
+Use the command "pickup" to take items.
