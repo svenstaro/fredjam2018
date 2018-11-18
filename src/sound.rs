@@ -26,6 +26,7 @@ pub enum Effect {
     EnemyAttack,
     PlayerAttack,
     Backspace,
+    Door
 }
 
 #[derive(Clone, Copy, PartialEq, Eq, Debug, EnumIter, Hash)]
@@ -173,6 +174,7 @@ impl AudioEvent {
                 Effect::EnemyAttack => &include_bytes!("../assets/wav/enemy_attack.wav")[..],
                 Effect::PlayerAttack => &include_bytes!("../assets/wav/player_attack.wav")[..],
                 Effect::Backspace => &include_bytes!("../assets/wav/backspace.wav")[..],
+                Effect::Door => &include_bytes!("../assets/wav/door.mp3")[..],
             },
             AudioEvent::Track(track) => match track {
                 Track::Intro => &include_bytes!("../assets/music/intro.mp3")[..],

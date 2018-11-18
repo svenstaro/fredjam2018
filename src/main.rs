@@ -366,6 +366,9 @@ fn main() -> Result<(), io::Error> {
                     ));
                 }
                 Action::Enter(room_type) => {
+                    app.event_queue.schedule_action(Action::Audio(
+                        AudioEvent::Effect(Effect::Door)
+                    ));
                     if room_type == RoomType::Cryocontrol {
                         if app.rooms.get(&room_type).unwrap().is_opened() {
                             enter_room(&mut app, room_type);
