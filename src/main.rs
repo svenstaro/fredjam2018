@@ -370,12 +370,18 @@ fn main() -> Result<(), io::Error> {
                             ));
                         }
                     } else if room_type == RoomType::Corridor {
-                        app.event_queue.schedule_action(Action::Message(
-                            String::from("Peering through the ventilation shafts,\
-                                it looks like they connect to a corridor.\
-                                You would need a tool to get through."),
-                            GameEventType::Failure,
-                        ));
+                        if app.rooms.get(&app.state.current_room).unwrap().is_opened() {
+                            enter_room(&mut app, room_type);
+                        } else {
+                            app.event_queue.schedule_action(Action::Message(
+                                String::from(
+                                    "Peering through the ventilation shafts,\
+                                     it looks like they connect to a corridor.\
+                                     You would need a tool to get through.",
+                                ),
+                                GameEventType::Failure,
+                            ));
+                        }
                     } else {
                         enter_room(&mut app, room_type);
                     }
