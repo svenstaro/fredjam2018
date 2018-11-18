@@ -1,5 +1,4 @@
-use crate::game_event::GameEventType;
-use crate::room::{Room, RoomType};
+use crate::room::Room;
 use crate::EventQueue;
 use crate::{Action, ActionHandled, State};
 
