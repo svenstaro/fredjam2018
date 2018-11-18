@@ -41,7 +41,7 @@ use crate::event::{Event, Events};
 use crate::event_queue::EventQueue;
 use crate::game_event::{GameEvent, GameEventType};
 use crate::room::{enter_room, Room, RoomType};
-use crate::rooms::{CryobayRoom, SlushLobbyRoom};
+use crate::rooms::{CryobayRoom, SlushLobbyRoom, Cryocontrol};
 use crate::timer::TimerType;
 
 use crate::state::State;
@@ -112,6 +112,8 @@ fn main() -> Result<(), io::Error> {
 
     app.rooms
         .insert(RoomType::Cryobay, Box::new(CryobayRoom::new()));
+    app.rooms
+        .insert(RoomType::Cryocontrol, Box::new(Cryocontrol::new()));
     app.rooms
         .insert(RoomType::SlushLobby, Box::new(SlushLobbyRoom::new()));
 
