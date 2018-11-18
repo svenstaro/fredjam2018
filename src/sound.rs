@@ -30,7 +30,8 @@ pub enum Effect {
 #[derive(Clone, Copy, PartialEq, Eq, Debug, EnumIter, Hash)]
 pub enum Track {
     Intro,
-    Compliactions,
+    Complications,
+    Loop,
 }
 
 struct MusicPlayback {
@@ -173,7 +174,8 @@ impl AudioEvent {
             },
             AudioEvent::Track(track) => match track {
                 Track::Intro => &include_bytes!("../assets/music/intro.mp3")[..],
-                Track::Compliactions => &include_bytes!("../assets/music/complications.mp3")[..],
+                Track::Complications => &include_bytes!("../assets/music/complications.mp3")[..],
+                Track::Loop => &include_bytes!("../assets/music/loop.mp3")[..],
             },
         }
     }

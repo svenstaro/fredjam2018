@@ -32,7 +32,8 @@ impl RoomType {
     fn get_track(&self) -> Track {
         match self {
             RoomType::Cryobay => Track::Intro,
-            _ => Track::Compliactions,
+            RoomType::Cryocontrol => Track::Complications,
+            _ => Track::Loop,
         }
     }
 }
