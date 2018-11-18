@@ -8,7 +8,7 @@ pub enum ActionHandled {
     NotHandled,
 }
 
-#[derive(Debug, PartialEq, Eq, Hash, Clone)]
+#[derive(Debug, PartialEq, Eq, Hash, Clone, Display)]
 pub enum Action {
     // System Actions.
     Tick(u64),

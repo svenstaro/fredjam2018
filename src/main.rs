@@ -26,6 +26,7 @@ mod entities;
 mod event;
 mod event_queue;
 mod game_event;
+mod global_handlers;
 mod room;
 mod rooms;
 mod sound;
@@ -39,6 +40,7 @@ use crate::entities::enemy::initialize_enemies;
 use crate::event::{Event, Events};
 use crate::event_queue::EventQueue;
 use crate::game_event::{GameEvent, GameEventType};
+use crate::global_handlers::handle_action;
 use crate::room::{enter_room, Room, RoomType};
 use crate::rooms::{CorridorRoom, CryobayRoom, Cryocontrol, SlushLobbyRoom};
 use crate::sound::{AudioEvent, Effect};
@@ -342,172 +344,16 @@ fn main() -> Result<(), io::Error> {
             }
         }
 
-        // Handle game actions here (Timers).
-        while !app.event_queue.is_empty() {
-            let next_action = app.event_queue.get_next_action().unwrap();
-            match app.try_handle_room_action(&next_action) {
-                ActionHandled::Handled => break,
+        while let Some(next_action) = app.event_queue.get_next_action() {
+            match next_action {
+                Action::Audio(action) => {
+                    snd_send.send(action).unwrap();
+                    continue;
+                },
                 _ => (),
             }
 
-            // Handle system and global actions here.
-            match next_action {
-                Action::Message(mut message, game_event_type) => {
-                    message.push('\n');
-                    app.log.push_front(GameEvent {
-                        content: message,
-                        game_event_type,
-                    })
-                }
-                Action::Rebooted => {
-                    app.event_queue.schedule_action(Action::Message(
-                        String::from("System rebooted sucessfully"),
-                        GameEventType::Success,
-                    ));
-                }
-                Action::Enter(room_type) => {
-                    if room_type == RoomType::Cryocontrol {
-                        if app.rooms.get(&room_type).unwrap().is_opened() {
-                            if room_type != RoomType::Corridor {
-                                app.event_queue
-                                    .schedule_action(Action::Audio(AudioEvent::Effect(
-                                        Effect::Door,
-                                    )));
-                            }
-                            enter_room(&mut app, room_type);
-                        } else {
-                            app.event_queue.schedule_action(Action::Message(
-                                String::from("The door is closed and won't open."),
-                                GameEventType::Failure,
-                            ));
-                        }
-                    } else if room_type == RoomType::Corridor {
-                        if app.rooms.get(&room_type).unwrap().is_opened() {
-                            enter_room(&mut app, room_type);
-                        } else {
-                            app.event_queue.schedule_action(Action::Message(
-                                String::from(
-                                    "Peering through the ventilation shafts,\
-                                     it looks like they connect to a corridor.\
-                                     You would need a tool to get through.",
-                                ),
-                                GameEventType::Failure,
-                            ));
-                        }
-                    } else {
-                        enter_room(&mut app, room_type);
-                    }
-                }
-                Action::Leave(_) => {}
-                Action::Command(tokens) => app.try_handle_command(tokens),
-                Action::EnemyAttack => {
-                    if let Some(ref enemy) = app.state.get_current_enemy(app.state.current_room) {
-                        let timers = enemy.get_attack_timers(0);
-                        for timer in timers {
-                            app.event_queue.schedule_timer(timer);
-                        }
-
-                        app.log.push_front(GameEvent {
-                            content: format!(
-                                "{} You lose {} HP.\n",
-                                enemy.get_enemy_attack_message(),
-                                enemy.get_attack_strength(),
-                            ),
-                            game_event_type: GameEventType::Combat,
-                        });
-
-                        app.state.player.health -= enemy.get_attack_strength();
-                        if app.state.player.health <= 0 {
-                            app.event_queue.schedule_action(Action::PlayerDied);
-                        }
-                    }
-                }
-                Action::Audio(action) => {
-                    snd_send.send(action).unwrap();
-                }
-                Action::Attack => {
-                    let damage = app.state.player.attack_strength;
-                    let mut enemy_option = app.state.get_current_enemy_mut(app.state.current_room);
-                    match enemy_option {
-                        Some(ref mut enemy) => {
-                            enemy.reduce_health(damage);
-                            let attack_message = enemy.get_attack_message();
-                            if enemy.get_health() <= 0 {
-                                app.state.enemies.remove(&app.state.current_room);
-                                app.event_queue
-                                    .schedule_action(Action::Audio(AudioEvent::Effect(
-                                        Effect::PlayerAttack,
-                                    )));
-                                app.log.push_front(GameEvent {
-                                    content: String::from("The enemy has been slain.\n"),
-                                    game_event_type: GameEventType::Failure,
-                                });
-                                app.event_queue
-                                    .emplace_timers(TimerType::EnemyAttack, vec![]);
-                            }
-                            app.log.push_front(GameEvent {
-                                content: format!("{}\n", attack_message),
-                                game_event_type: GameEventType::Combat,
-                            });
-                        }
-                        None => {
-                            app.event_queue.schedule_action(Action::Message(
-                                String::from("There is nothing you can attack."),
-                                GameEventType::Failure,
-                            ));
-                        }
-                    };
-                }
-                Action::PlayerDied => {
-                    app.event_queue.schedule_action(Action::Message(
-                        String::from("You died."),
-                        GameEventType::Failure,
-                    ));
-                }
-                Action::Dodge => {
-                    let mut attack_timers = app.event_queue.get_timers(TimerType::EnemyAttack);
-                    if attack_timers.is_empty() {
-                        if app.state.enemies.get(&app.state.current_room).is_some() {
-                            app.event_queue.schedule_action(Action::Message(
-                                String::from("You dodge the attack. The enemy calmly analyses your movements."),
-                                GameEventType::Failure,
-                                ));
-                            break;
-                        }
-                        app.event_queue.schedule_action(Action::Message(
-                            String::from("You dodge the attack of your own paranoia..."),
-                            GameEventType::Failure,
-                        ));
-                        break;
-                    }
-
-                    for elem in attack_timers.iter_mut() {
-                        elem.elapsed = 0;
-                    }
-                    if let Some(enemy) = app.state.get_current_enemy(app.state.current_room) {
-                        app.event_queue
-                            .emplace_timers(TimerType::EnemyAttack, enemy.get_attack_timers(0));
-                    }
-
-                    let enemy_type = app
-                        .state
-                        .enemies
-                        .get(&app.state.current_room)
-                        .unwrap()
-                        .get_enemy_type();
-                    app.event_queue.schedule_action(Action::Message(
-                        String::from(format!("You dodge the {:?}'s attack.", enemy_type)),
-                        GameEventType::Success,
-                    ));
-                }
-                Action::Tick(dt) => {
-                    app.event_queue.tick(dt);
-                }
-                _ => app.log.push_front(GameEvent {
-                    content: String::from("Unhandled action!\n"),
-                    game_event_type: GameEventType::Debug,
-                }),
-            }
+            handle_action(&mut app, next_action);
         }
 
         now = Instant::now();

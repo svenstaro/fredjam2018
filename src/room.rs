@@ -2,7 +2,7 @@ use std::fmt::Debug;
 
 use strum::EnumProperty;
 
-use crate::game_event::{GameEventType, GameEvent};
+use crate::game_event::{GameEvent, GameEventType};
 use crate::sound::{AudioEvent, Track};
 use crate::App;
 use crate::EventQueue;
@@ -24,13 +24,13 @@ pub trait Room: Debug {
 
 #[derive(Debug, PartialEq, Eq, Hash, Clone, Copy, EnumProperty)]
 pub enum RoomType {
-    #[strum(props(game_name="cryobay"))]
+    #[strum(props(game_name = "cryobay"))]
     Cryobay,
-    #[strum(props(game_name="slush lobby"))]
+    #[strum(props(game_name = "slush lobby"))]
     SlushLobby,
-    #[strum(props(game_name="cryocontrol"))]
+    #[strum(props(game_name = "cryocontrol"))]
     Cryocontrol,
-    #[strum(props(game_name="ventilation shaft"))]
+    #[strum(props(game_name = "ventilation shaft"))]
     Corridor,
 }
 
@@ -125,10 +125,11 @@ pub fn enter_room(app: &mut App, room_type: RoomType) {
 
     app.log.push_front(GameEvent {
         content: door_msg,
-        game_event_type: GameEventType::Normal
+        game_event_type: GameEventType::Normal,
     });
 
-    app.event_queue.schedule_actions(room_specific_actions(&app, room_type));
+    app.event_queue
+        .schedule_actions(room_specific_actions(&app, room_type));
 
     if has_visited {
         app.event_queue.schedule_action(Action::Message(
@@ -147,13 +148,18 @@ pub fn enter_room(app: &mut App, room_type: RoomType) {
 fn room_specific_actions(app: &App, room_type: RoomType) -> Vec<Action> {
     match room_type {
         RoomType::Cryocontrol => {
-            if (app.rooms.get(&room_type).unwrap().is_visited() &&
-                app.state.get_current_enemy(room_type).is_none()) {
-                    vec![Action::Message("The central cortex rumbles uneasily. There's a terminal in front of it.".into(), GameEventType::Normal)]
+            if app.rooms.get(&room_type).unwrap().is_visited()
+                && app.state.get_current_enemy(room_type).is_none()
+            {
+                vec![Action::Message(
+                    "The central cortex rumbles uneasily. There's a terminal in front of it."
+                        .into(),
+                    GameEventType::Normal,
+                )]
             } else {
                 vec![]
             }
         }
-        _ => vec![]
+        _ => vec![],
     }
 }
