@@ -160,9 +160,9 @@ pub fn initialize_enemies(state: &mut State) {
 
     let rat = GenericEnemy::new(
         EnemyType::Rat,
-        5,
-        1,
-        5 * 1000,
+        10,
+        2,
+        8 * 1000,
         rat_attack_messages,
         rat_enemy_attack_messages,
     );

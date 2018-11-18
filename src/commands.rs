@@ -3,6 +3,8 @@ use crate::game_event::GameEventType;
 use crate::room::{adjacent_rooms, room_type_from_name};
 use crate::state::State;
 
+static HELP_TEXT: &'static str = "Use one of the following commands: enter, attack, dodge, pick up, use.";
+
 pub fn try_handle_command(tokens: String, state: &State) -> Vec<Action> {
     let mut split = tokens.split(" ");
     let command = split.next();
@@ -32,12 +34,12 @@ pub fn try_handle_command(tokens: String, state: &State) -> Vec<Action> {
         Some("attack") => vec![Action::Attack],
         Some("dodge") => vec![Action::Dodge],
         _ => vec![Action::Message(
-            String::from("Use one of the following commands: enter, attack, dodge."),
+            HELP_TEXT.into(),
             GameEventType::Failure,
         )],
         Some("dodge") => vec![Action::Dodge],
         _ => vec![Action::Message(
-            String::from("Use one of the following commands: enter, attack, dodge."),
+            HELP_TEXT.into(),
             GameEventType::Failure,
         )],
         Some("pick up crowbar") => vec![Action::PickUpCrowbar],
@@ -50,7 +52,7 @@ pub fn try_handle_command(tokens: String, state: &State) -> Vec<Action> {
 
         Some("look around") => vec![Action::LookAround],
         _ => vec![Action::Message(
-            String::from("Use one of the following commands: enter, attack, dodge."),
+            HELP_TEXT.into(),
             GameEventType::Failure,
         )],
     }

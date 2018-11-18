@@ -460,8 +460,10 @@ fn main() -> Result<(), io::Error> {
                     for elem in attack_timers.iter_mut() {
                         elem.elapsed = 0;
                     }
-                    app.event_queue
-                        .emplace_timers(TimerType::EnemyAttack, attack_timers);
+                    if let Some(enemy) = app.state.get_current_enemy(app.state.current_room) {
+                        app.event_queue
+                            .emplace_timers(TimerType::EnemyAttack, enemy.get_attack_timers(0));
+                    }
 
                     let enemy_type = app
                         .state
