@@ -2,7 +2,8 @@ use crate::entities::Item;
 use crate::game_event::GameEventType;
 use crate::room::Room;
 use crate::EventQueue;
-use crate::{Action, ActionHandled, State};
+use crate::{Action, ActionHandled, State, RoomType};
+use strum::EnumProperty;
 
 #[derive(Debug)]
 pub struct CorridorRoom {
@@ -63,6 +64,15 @@ impl Room for CorridorRoom {
                     ));
                 }
                 ActionHandled::Handled
+            }
+            Action::ShowEnterText => {
+                if state.get_current_enemy(RoomType::Corridor).is_none() {
+                    event_queue.schedule_action(Action::Message(
+                        "You see the rat's keycard lying around in the corner.".into(),
+                        GameEventType::Normal
+                    ))
+                }
+                ActionHandled::NotHandled
             }
             _ => ActionHandled::NotHandled,
         }
