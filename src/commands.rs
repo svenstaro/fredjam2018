@@ -59,7 +59,7 @@ pub fn try_handle_command(tokens: String, state: &State) -> Vec<Action> {
                 Some("crowbar") => vec![Action::PickUpCrowbar],
                 Some("keycard") => vec![Action::PickUpKeycard],
                 _ => vec![Action::Message(
-                    String::from("No such item."),
+                    String::from("This item doesn't exist."),
                     GameEventType::Failure,
                 )],
             }

@@ -8,9 +8,8 @@ use crate::room;
 
 // Handle game actions here (Timers).
 pub fn handle_action(mut app: &mut App, next_action: Action) {
-    match app.try_handle_room_action(&next_action) {
-        ActionHandled::Handled => return,
-        _ => (),
+    if app.try_handle_room_action(&next_action).is_some() {
+        return
     }
 
     // Handle system and global actions here.

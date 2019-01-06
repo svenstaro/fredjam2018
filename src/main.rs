@@ -77,16 +77,13 @@ impl App {
     }
 
     // Return value indicates redraw required.
-    pub fn try_handle_room_action(&mut self, action: &Action) -> ActionHandled {
+    pub fn try_handle_room_action(&mut self, action: &Action) -> Option<ActionHandled> {
         // Try handling the action in a room, if that succeeds, then return true.
-        for (_, ref mut room) in &mut self.rooms {
-            match room.handle_action(&mut self.state, &mut self.event_queue, action) {
-                ActionHandled::Handled => return ActionHandled::Handled,
-                _ => (),
-            }
+        let current_room = self.rooms.get_mut(&self.state.current_room)?;
+        match current_room.handle_action(&mut self.state, &mut self.event_queue, action) {
+            ActionHandled::Handled => Some(ActionHandled::Handled),
+            _ => None,
         }
-
-        ActionHandled::NotHandled
     }
 
     pub fn try_handle_command(&mut self, tokens: String) {
