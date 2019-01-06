@@ -13,7 +13,12 @@ static HELP_TEXT: &'static str =
     "Use one of the following commands: enter, attack, dodge, pickup, use.";
 
 pub fn try_handle_command(tokens: String, state: &State) -> Vec<Action> {
-    let mut parse = CommandParser::parse(Rule::command, &tokens).unwrap().flatten();
+    let mut parse = match CommandParser::parse(Rule::command, &tokens) {
+        Ok(parse) => parse.flatten(),
+        Err(_) => {
+            return vec![Action::Message(HELP_TEXT.into(), GameEventType::Failure)];
+        }
+    };
     let object = parse.clone().find(|pair| pair.as_rule() == Rule::object)
         .map(|v| v.as_str());
     let verb = parse.find(|pair| pair.as_rule() == Rule::verb);

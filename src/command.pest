@@ -1,4 +1,4 @@
-command = { SOI ~ verb ~ space+ ~ object ~ EOI }
+command = { SOI ~ verb ~ space* ~ object? ~ EOI }
 verb = { ASCII_ALPHANUMERIC+ }
 object = { (ASCII_ALPHANUMERIC | " " ) + }
 space = _{ " " }
