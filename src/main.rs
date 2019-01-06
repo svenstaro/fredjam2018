@@ -167,6 +167,7 @@ fn main() -> Result<(), io::Error> {
                     .as_ref(),
                 )
                 .split(v_chunks_right[0]);
+
             let styled_log = {
                 let mut log = vec![];
                 for game_event in &app.log {
@@ -181,6 +182,13 @@ fn main() -> Result<(), io::Error> {
                 }
                 log
             };
+
+            if cfg!(debug_assertions) {
+                Paragraph::new([Text::raw("DEV MODE: no movement restrictions + other cheats enabled")].iter())
+                    .style(Style::default().fg(Color::Red))
+                    .render(&mut f, *v_chunks_right_up.last().unwrap())
+            }
+
             Paragraph::new(styled_log.iter())
                 .block(Block::default().borders(Borders::ALL).title("Events"))
                 .wrap(true)
@@ -193,6 +201,7 @@ fn main() -> Result<(), io::Error> {
                 .style(Style::default())
                 .block(Block::default().borders(Borders::ALL).title("Character"))
                 .render(&mut f, input_status_line[1]);
+
             Canvas::default()
                 .block(Block::default().borders(Borders::ALL).title("Map"))
                 .paint(|ctx| {
@@ -267,7 +276,7 @@ fn main() -> Result<(), io::Error> {
                             height: 12,
                         },
                         color: match app.state.current_room {
-                            RoomType::Corridor => Color::Red,
+                            RoomType::Corridor => Color::Blue,
                             _ => Color::White,
                         },
                     });
@@ -275,11 +284,13 @@ fn main() -> Result<(), io::Error> {
                 .x_bounds([0.0, 100.0])
                 .y_bounds([0.0, 100.0])
                 .render(&mut f, v_chunks_right[1]);
+
             let visible_timers = app
                 .event_queue
                 .timers
                 .iter()
                 .filter(|timer| timer.is_visual);
+
             for (index, timer) in visible_timers.enumerate() {
                 // Only render the first 5 timers.
                 if index > 4 {
