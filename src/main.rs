@@ -312,7 +312,7 @@ fn main() -> Result<(), io::Error> {
         match events.next().unwrap() {
             Event::Input(input) => match input {
                 Key::Esc => {
-                    std::process::exit(0);
+                    break;
                 }
                 Key::Char('\n') => {
                     if !app.input.is_empty() {
