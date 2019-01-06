@@ -32,6 +32,8 @@ pub trait Enemy: Debug {
     fn get_attack_message(&self) -> String;
 
     fn get_enemy_attack_message(&self) -> String;
+
+    fn get_death_message(&self) -> String;
 }
 
 #[derive(Debug)]
@@ -42,6 +44,7 @@ pub struct GenericEnemy {
     timer_length: u64,
     attack_messages: Vec<String>,
     enemy_attack_messages: Vec<String>,
+    death_message: Option<String>,
 }
 
 impl GenericEnemy {
@@ -52,6 +55,7 @@ impl GenericEnemy {
         timer_length: u64,
         attack_messages: Vec<String>,
         enemy_attack_messages: Vec<String>,
+        death_message: Option<String>,
     ) -> Self {
         GenericEnemy {
             enemy_type,
@@ -60,6 +64,7 @@ impl GenericEnemy {
             timer_length,
             attack_messages,
             enemy_attack_messages,
+            death_message
         }
     }
 }
@@ -128,6 +133,14 @@ impl Enemy for GenericEnemy {
             ),
         ]
     }
+
+    fn get_death_message(&self) -> String {
+        if let Some(message) = &self.death_message {
+            message.clone()
+        } else {
+            format!("The {:?} has been slain.\n", self.enemy_type)
+        }
+    }
 }
 
 pub fn initialize_enemies(state: &mut State) {
@@ -144,6 +157,7 @@ pub fn initialize_enemies(state: &mut State) {
         8 * 1000,
         rat_attack_messages,
         rat_enemy_attack_messages,
+        Some("The rat is dead. It drops its keycard.".into()),
     );
     state.enemies.insert(RoomType::Corridor, Box::new(rat));
 
@@ -166,6 +180,7 @@ pub fn initialize_enemies(state: &mut State) {
         3 * 1000,
         roomba_attack_messages,
         roomba_enemy_attack_messages,
+        None,
     );
     state
         .enemies

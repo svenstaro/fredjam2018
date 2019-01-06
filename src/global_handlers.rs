@@ -72,17 +72,17 @@ pub fn handle_action(mut app: &mut App, next_action: Action) {
                 let attack_message = enemy.get_attack_message();
                 let enemy_type = enemy.get_enemy_type();
                 if enemy.get_health() <= 0 {
-                    app.state.enemies.remove(&app.state.current_room);
                     app.event_queue
                         .schedule_action(Action::Audio(AudioEvent::Effect(
                             Effect::PlayerAttack,
                         )));
                     app.log.push_front(GameEvent {
-                        content: format!("The {:?} has been slain.\n", enemy_type),
+                        content: enemy.get_death_message(),
                         game_event_type: GameEventType::Failure,
                     });
                     app.event_queue
                         .emplace_timers(TimerType::EnemyAttack, vec![]);
+                    app.state.enemies.remove(&app.state.current_room);
                 }
                 app.log.push_front(GameEvent {
                     content: format!("{}\n", attack_message),
