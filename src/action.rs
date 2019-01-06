@@ -47,5 +47,7 @@ pub enum Action {
     OpenCorridor,
     OpenCryoControl,
 
+    ShowEnterText,
+
     Rebooted,
 }

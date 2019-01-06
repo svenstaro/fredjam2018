@@ -4,6 +4,7 @@ use crate::room::{closed_message, enter_room, RoomType};
 use crate::sound::{AudioEvent, Effect};
 use crate::timer::TimerType;
 use crate::App;
+use crate::room;
 
 // Handle game actions here (Timers).
 pub fn handle_action(mut app: &mut App, next_action: Action) {
@@ -42,6 +43,12 @@ pub fn handle_action(mut app: &mut App, next_action: Action) {
             }
         }
         Action::Leave(_) => {}
+        Action::ShowEnterText => {
+            app.event_queue.schedule_action(Action::Message(
+                room::room_intro_text(app.state.current_room).0.into(),
+                GameEventType::Normal,
+            ));
+        }
         Action::Command(tokens) => app.try_handle_command(tokens),
         Action::EnemyAttack => {
             if let Some(ref enemy) = app.state.get_current_enemy(app.state.current_room) {

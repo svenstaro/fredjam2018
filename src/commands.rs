@@ -51,6 +51,7 @@ pub fn try_handle_command(tokens: String, state: &State) -> Vec<Action> {
                 )]
             }
         }
+        Some("look") => vec![Action::ShowEnterText],
         Some("attack") => vec![Action::Attack],
         Some("dodge") => vec![Action::Dodge],
         Some("pickup") => {
